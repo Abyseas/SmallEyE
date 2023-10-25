@@ -1,2 +1,3 @@
-# qiniu-web-short-video
-A Web Short Video Demo based on qiniu sdk and web tech
+# Web short video前端Demo
+> 在这个分支上开发前端
+
