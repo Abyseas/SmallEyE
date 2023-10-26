@@ -46,7 +46,7 @@
 </script>
 
 <template>
-  <div class="video-carousel-container" :style="`width: ${200}; height: ${200}`">
+  <div class="video-swiper-container" :style="`width: ${200}; height: ${200}`">
     <swiper
       ref="swiperRef"
       class="eye-swiper"
@@ -135,7 +135,7 @@
 </template>
 
 <style lang="less" scoped>
-  .video-carousel-container {
+  .video-swiper-container {
     width: 100%;
     height: 100%;
     overflow: hidden;
