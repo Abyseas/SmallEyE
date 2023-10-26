@@ -1,23 +1,22 @@
-<script setup lang="ts">
-import Player from './components/Player.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
-<!-- Route -->
-  <Player />
+  <router-view></router-view>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+<style lang="less" scoped>
+  #app {
+    padding: 0;
+    margin: 0;
+  }
+
+  body {
+    background-color: #161722;
+  }
+
+  // 隐藏滚动条
+  ::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
 </style>
