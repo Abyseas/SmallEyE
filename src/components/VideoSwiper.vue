@@ -63,19 +63,19 @@
         <div class="right_menus">
           <!-- 作者 -->
           <div class="menuClick">
-            <el-tooltip class="item" effect="dark" content="进入作者主页" placement="right-start">
+            <el-tooltip effect="dark" content="进入作者主页" placement="right-start">
               <img class="avatar" :src="item.avatar" alt="" />
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="关注" placement="right-start">
-              <el-icon class="follow van-icon van-icon-plus">
+            <el-tooltip effect="dark" content="关注" placement="right-start">
+              <el-icon class="follow">
                 <icon-plus></icon-plus>
               </el-icon>
             </el-tooltip>
           </div>
           <!-- 点赞 -->
           <div class="click-info">
-            <el-tooltip class="item" effect="dark" content="点赞" placement="right-start">
-              <el-icon class="van-icon van-icon-like">
+            <el-tooltip effect="dark" content="点赞" placement="right-start">
+              <el-icon>
                 <icon-heart></icon-heart>
               </el-icon>
             </el-tooltip>
@@ -83,8 +83,8 @@
           </div>
           <!-- 评论 -->
           <div class="click-info">
-            <el-tooltip class="item" effect="dark" content="评论" placement="right-start">
-              <el-icon class="van-icon van-icon-chat">
+            <el-tooltip effect="dark" content="评论" placement="right-start">
+              <el-icon>
                 <icon-comment></icon-comment>
               </el-icon>
             </el-tooltip>
@@ -92,8 +92,8 @@
           </div>
           <!-- 收藏 -->
           <div class="click-info">
-            <el-tooltip class="item" effect="dark" content="收藏" placement="right-start">
-              <el-icon class="van-icon van-icon-star">
+            <el-tooltip effect="dark" content="收藏" placement="right-start">
+              <el-icon>
                 <icon-star></icon-star>
               </el-icon>
             </el-tooltip>
@@ -101,8 +101,8 @@
           </div>
           <!-- 分享 -->
           <div class="click-info">
-            <el-tooltip class="item" effect="dark" content="分享" placement="right-start">
-              <el-icon class="van-icon van-icon-share">
+            <el-tooltip effect="dark" content="分享" placement="right-start">
+              <el-icon>
                 <icon-share></icon-share>
               </el-icon>
             </el-tooltip>
@@ -135,92 +135,5 @@
 </template>
 
 <style lang="less" scoped>
-  .video-swiper-container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    cursor: pointer;
-
-    .eye-swiper {
-      height: 800px;
-      overflow: hidden;
-      border-radius: 20px;
-      .swiper-slide {
-        position: relative;
-        height: 800px;
-        .video-content {
-          width: 100%;
-          height: 100%;
-          background-color: #000;
-        }
-      }
-      .right_menus {
-        position: absolute;
-        width: 50px;
-        bottom: 80px;
-        right: 20px;
-        z-index: 1;
-        text-align: center;
-        .menuClick {
-          position: relative;
-          width: 100%;
-          margin-bottom: 30px;
-          .avatar {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-          }
-          .follow {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            left: 50%;
-            bottom: -5px;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: #fff;
-            background-color: #fe2c55;
-            border-radius: 50%;
-            line-height: 20px;
-          }
-        }
-        .click-info {
-          position: relative;
-          margin-bottom: 20px;
-          i {
-            font-size: 24px;
-            color: #fff;
-          }
-          .text {
-            color: #fff;
-            font-size: 16px;
-            margin-top: 5px;
-          }
-        }
-      }
-      .text-container {
-        position: absolute;
-        width: 30%;
-        left: 0;
-        bottom: 80px;
-        padding: 0 30px;
-        box-sizing: border-box;
-        z-index: 1;
-        .nickname {
-          width: 100%;
-          font-size: 24px;
-          color: #fff;
-          text-align: left;
-        }
-        .msg {
-          position: relative;
-          width: 100%;
-          box-sizing: border-box;
-          font-size: 18px;
-          text-align: left;
-          color: #fff;
-        }
-      }
-    }
-  }
+  @import '@/styles/swiper.less';
 </style>

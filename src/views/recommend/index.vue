@@ -1,6 +1,4 @@
-<script setup lang="ts">
-  import VideoSwiper from '../../components/VideoSwiper.vue'
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div class="recommend-view">

@@ -27,6 +27,7 @@
       "@/api/*": ["src/api/*"],
       "@/views/*": ["src/views/*"],
       "@/utils/*": ["src/utils/*"],
+      "@/styles/*": ["src/styles/*"],
       "@/components/*": ["src/components/*"]
     }
   },
