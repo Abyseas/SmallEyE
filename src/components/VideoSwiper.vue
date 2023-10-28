@@ -1,45 +1,36 @@
 <script setup lang="ts">
-  import { video } from '@/api/video'
   import { Swiper, SwiperSlide } from 'swiper/vue'
   import { Navigation, Mousewheel, Keyboard } from 'swiper/modules'
   import IconComment from '~icons/custom/comment'
-  import IconHeart from '~icons/custom/heart'
+  import IconFilledHeart from '~icons/custom/filled_heart'
   // import IconMore from '~icons/custom/more'
   import IconStar from '~icons/custom/star'
   import IconPlus from '~icons/custom/plus'
   import IconShare from '~icons/custom/share'
-  const videoList = ref<API.VideoInfo[]>([])
+
+  const props = defineProps<{
+    videoList: API.VideoInfo[]
+  }>()
+
   const muted = ref(true)
-  const getVideoList = async () => {
-    const videoResult = await video()
-    videoList.value = videoResult.data.list
-  }
 
   const modules = [Navigation, Mousewheel, Keyboard]
 
-  getVideoList()
-
-  const changeMuted = (event: any) => {
+  const handleMutedChange = (event: Event) => {
     const player = event.target as HTMLAudioElement
     muted.value = player.muted
   }
 
   const handleSlideChange = (swiper: any) => {
     const activeIndex = swiper.activeIndex
-    const preIndex = swiper.previousIndex
-    videoList.value.forEach((_, s_index) => {
+    props.videoList.forEach((_, s_index) => {
       const sPlayer = document.getElementById(`player${s_index}`) as HTMLAudioElement
       if (s_index !== activeIndex) {
         sPlayer.pause()
         sPlayer.controls = false
       } else {
-        sPlayer.addEventListener('volumechange', changeMuted)
         sPlayer.controls = true
         sPlayer.play()
-      }
-
-      if (s_index === preIndex) {
-        sPlayer.removeEventListener('volumechange', changeMuted)
       }
     })
   }
@@ -76,7 +67,7 @@
           <div class="click-info">
             <el-tooltip effect="dark" content="点赞" placement="right-start">
               <el-icon>
-                <icon-heart></icon-heart>
+                <icon-filled-heart></icon-filled-heart>
               </el-icon>
             </el-tooltip>
             <div class="text">{{ item.like_num }}</div>
@@ -111,7 +102,7 @@
         </div>
         <div class="text-container">
           <div class="nickname"> @{{ item.nickname ? item.nickname : item.username }} </div>
-          <div class="msg">{{ item.title }}</div>
+          <div class="video-title">{{ item.title }}</div>
         </div>
         <video
           class="video-content"
@@ -123,11 +114,10 @@
           autoplay
           controls
           loop
-          width="100%"
-          height="100%"
           oncontextmenu="return false;"
           controlslist="nodownload noremoteplayback"
           :disablePictureInPicture="true"
+          @volumechange="handleMutedChange"
         ></video>
       </swiper-slide>
     </swiper>

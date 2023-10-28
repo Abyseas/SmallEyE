@@ -1,8 +1,17 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+  import { video } from '@/api/video'
+  const videoList = ref<API.VideoInfo[]>([])
+  const getVideoList = async () => {
+    const videoResult = await video()
+    videoList.value = videoResult.data.list
+  }
+
+  getVideoList()
+</script>
 
 <template>
   <div class="recommend-view">
-    <VideoSwiper></VideoSwiper>
+    <VideoSwiper :videoList="videoList"></VideoSwiper>
   </div>
 </template>
 

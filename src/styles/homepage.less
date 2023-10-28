@@ -1,0 +1,29 @@
+@import '@/styles/variables.less';
+.home-page-container {
+  display: flex;
+  width: calc(100vw - @left-aside-width);
+  height: calc(100vh - @header-height - 40px);
+  flex-wrap: wrap;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  .waterfall-list {
+    background-color: #243c61;
+  }
+
+  &::-webkit-scrollbar {
+    height: 10px !important;
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-button {
+    height: 10px !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: #a2b2c1;
+    height: 10px !important;
+  }
+}
