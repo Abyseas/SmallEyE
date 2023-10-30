@@ -5,7 +5,7 @@
   const videoList = ref<API.VideoInfo[]>([])
   const getVideoList = async () => {
     const videoResult = await video()
-    videoList.value = videoResult.data.list
+    videoList.value = videoList.value.concat(videoResult.data.list)
   }
 
   const muted = ref(true)
@@ -19,7 +19,7 @@
 
 <template>
   <div class="home-page-container">
-    <Waterfall :list="videoList" :width="300">
+    <Waterfall :list="videoList" :width="300" v-infinite-scroll="getVideoList">
       <template #item="{ item }">
         <VideoCard :muted="muted" :video="item" @mutedChange="handleMutedChange"></VideoCard>
       </template>
