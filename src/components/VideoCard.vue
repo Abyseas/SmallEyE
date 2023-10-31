@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import IconHollowHeart from '~icons/custom/hollow_heart'
   const props = defineProps<{
-    card_width: number
     video: API.VideoInfo
     muted: boolean
   }>()

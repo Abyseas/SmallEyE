@@ -8,7 +8,7 @@
   height: 100%;
   .layout-container {
     color: #dcebf0;
-    background-color: #243c61;
+    background-color: @theme-color;
     width: 100%;
     height: 100%;
   }
@@ -17,20 +17,12 @@
     padding: 0px;
   }
 
-  .base-button {
+  .header-button {
     position: absolute;
     right: 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #4b9194;
-    color: #dcebf0;
-    font-size: @base-font-size;
-    margin: 10px;
-    &:hover {
-      background-color: #409fc5;
-    }
   }
-  .header {
+
+  .header { 
     margin: auto;
     height: @header-height;
     display: flex;
@@ -40,5 +32,26 @@
       position: absolute;
       left: 40px;
     }
+  }
+}
+
+
+.el-button.base-button {
+  border-color: #eee;;
+  border-radius: 5px;
+
+  background-color: #eee;
+  color: @theme-color;
+  font-size: @base-font-size;
+  margin: 10px;
+  &:hover {
+    border-color: #AEBDDB;
+    background-color: #AEBDDB;
+    color: #fff;
+  }
+  &:focus {
+    border-color: #AEBDDB;
+    background-color: #AEBDDB;
+    color: #fff;
   }
 }
