@@ -45,4 +45,13 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8000',    // 目标接口前缀
+        changeOrigin: true,   // 开启跨域
+        rewrite: (path) => path.replace(/^\/api/, ''),  // 路径重写
+      }
+    }
+  }
 })
