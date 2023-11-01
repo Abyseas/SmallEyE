@@ -1,2 +1,3 @@
-# qiniu-web-short-video
-A Web Short Video Demo based on qiniu sdk and web tech
+# How to use it
+前端请查看frontEnd分支
+后端请查看backEnd分支
