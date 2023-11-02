@@ -27,7 +27,6 @@
 <template>
   <el-card class="video-card" :body-style="{ padding: '0px' }">
     <div class="video-cover" @mouseenter="playVideo" @mouseout="closeVideo">
-      <!-- <el-image :src="props.video.thumb" fit="cover" /> -->
       <video
         class="video-content"
         type="video/mp4"

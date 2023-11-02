@@ -55,7 +55,7 @@
           <!-- 作者 -->
           <div class="menuClick">
             <el-tooltip effect="dark" content="进入作者主页" placement="right-start">
-              <img class="avatar" :src="item.avatar" alt="" />
+              <el-avatar :size="42" :src="item.avatar" />
             </el-tooltip>
             <el-tooltip effect="dark" content="关注" placement="right-start">
               <el-icon class="follow">
