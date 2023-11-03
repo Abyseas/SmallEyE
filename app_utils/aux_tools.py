@@ -1,5 +1,5 @@
 import qiniu
-from CONST import access_key, secret_key
+from .CONST import access_key, secret_key
 
 
 q = qiniu.Auth(access_key, secret_key)

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 import qiniu
 
 # self define
-from aux_tools import q, bucket, before_upload_data
+from app_utils.aux_tools import q, bucket, before_upload_data
 from app_db.database import engine, get_db
 from app_db import schemas, crud, models
 
@@ -113,14 +113,15 @@ async def upload_source(bucket_name: str, file: UploadFile = File(), metadata: s
 
 @app.get("/get_metadata/{bucket_name}/{filename}")
 def read_file_metadata(bucket_name: str, filename: str):
-    key = f"user2/video/{filename}"
+    key = f"user@1/video/{filename}"
     ret, info = bucket.stat(bucket_name, key)
 
     return ret
 
 
 # DataBase operation
-@router_database.get("/users/{user_id}", response_model=schemas.User)
+@router_database.get("/users/{user_id}", response_model=schemas.User,
+                     tags=["database"])
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
@@ -128,13 +129,14 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@router_database.get("/users", response_model=list[schemas.User])
+@router_database.get("/users", response_model=list[schemas.User], tags=["database"])
 def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
 
-@router_database.post("/users/", response_model=schemas.User)
+@router_database.post("/users/", response_model=schemas.User,
+                      tags=["database"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
@@ -142,13 +144,15 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@router_database.get("/videos/", response_model=list[schemas.Video])
+@router_database.get("/videos/", response_model=list[schemas.Video],
+                     tags=["database"])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_videos(db, skip=skip, limit=limit)
     return items
 
 
-@router_database.post("/users/{user_id}/videos/", response_model=schemas.Video)
+@router_database.post("/users/{user_id}/videos/", response_model=schemas.Video,
+                      tags=["database"])
 def create_item_for_user(user_id: int, video: schemas.VideoCreate,
                          db: Session = Depends(get_db)):
     return crud.create_user_video(db=db, video=video, user_id=user_id)

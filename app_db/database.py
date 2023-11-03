@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-from CONST import SQLALCHEMY_DATABASE_URL
+from app_utils.CONST import SQLALCHEMY_DATABASE_URL
 
 # 导入 SQLAlchemy部件
 engine = create_engine(
