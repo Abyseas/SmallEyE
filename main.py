@@ -1,26 +1,27 @@
-# built-in and 3rd
-from typing import Union, Dict, Any
+# built-in
+from typing import Union
 import time
 import json
 import requests
-from aux_tools import q, bucket, before_upload_data
 
-# fastAPI
+# fastAPI relate
 import uvicorn
-from fastapi import FastAPI, Form, File, UploadFile
+from fastapi import FastAPI, APIRouter
+from fastapi import Form, File, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-
-# qi niu yun
+from sqlalchemy.orm import Session
 import qiniu
+
+# self define
+from aux_tools import q, bucket, before_upload_data
+from app_db.database import engine, get_db
+from app_db import schemas, crud, models
 
 # FastAPI application
 app = FastAPI()
+router_database = APIRouter(prefix="/database")
 
-origins = [
-    "*",
-]
-
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -28,13 +29,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-class Item(BaseModel):
-    name: str
-    description: Union[str, None] = None
-    price: float
-    tax: Union[float, None] = None
+models.Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
@@ -122,6 +117,45 @@ def read_file_metadata(bucket_name: str, filename: str):
     ret, info = bucket.stat(bucket_name, key)
 
     return ret
+
+
+# DataBase operation
+@router_database.get("/users/{user_id}", response_model=schemas.User)
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = crud.get_user(db, user_id=user_id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+
+@router_database.get("/users", response_model=list[schemas.User])
+def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    return users
+
+
+@router_database.post("/users/", response_model=schemas.User)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return crud.create_user(db=db, user=user)
+
+
+@router_database.get("/videos/", response_model=list[schemas.Video])
+def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    items = crud.get_videos(db, skip=skip, limit=limit)
+    return items
+
+
+@router_database.post("/users/{user_id}/videos/", response_model=schemas.Video)
+def create_item_for_user(user_id: int, video: schemas.VideoCreate,
+                         db: Session = Depends(get_db)):
+    return crud.create_user_video(db=db, video=video, user_id=user_id)
+
+
+# include sub router
+app.include_router(router_database)
 
 
 if __name__ == "__main__":
