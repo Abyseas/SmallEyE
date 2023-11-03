@@ -4,4 +4,6 @@ qiniu-sv/
 .idea/
 **/node_modules/
 
+# data file
 *.mp4
+*.db
