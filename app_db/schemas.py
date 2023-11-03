@@ -30,6 +30,7 @@ class Video(VideoBase):
 
 
 class UserBase(BaseModel):
+    username: str
     email: str
 
 
@@ -39,7 +40,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int
-    is_active: bool
+    is_active: bool = False
     videos: list[Video] = []
 
     class Config:

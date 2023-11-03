@@ -16,10 +16,11 @@ import qiniu
 from app_utils.aux_tools import q, bucket, before_upload_data
 from app_db.database import engine, get_db
 from app_db import schemas, crud, models
+from app_login import login_router
 
 # FastAPI application
 app = FastAPI()
-router_database = APIRouter(prefix="/database")
+router_database = APIRouter(prefix="/database", tags=["database"])
 
 origins = ["*"]
 app.add_middleware(
@@ -120,8 +121,7 @@ def read_file_metadata(bucket_name: str, filename: str):
 
 
 # DataBase operation
-@router_database.get("/users/{user_id}", response_model=schemas.User,
-                     tags=["database"])
+@router_database.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
@@ -129,30 +129,30 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@router_database.get("/users", response_model=list[schemas.User], tags=["database"])
+@router_database.get("/users", response_model=list[schemas.User])
 def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
     users = crud.get_users(db, skip=skip, limit=limit)
     return users
 
 
-@router_database.post("/users/", response_model=schemas.User,
-                      tags=["database"])
+@router_database.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    db_user = crud.get_user_by_username(db, username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="UserName already registered")
     return crud.create_user(db=db, user=user)
 
 
-@router_database.get("/videos/", response_model=list[schemas.Video],
-                     tags=["database"])
+@router_database.get("/videos/", response_model=list[schemas.Video])
 def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     items = crud.get_videos(db, skip=skip, limit=limit)
     return items
 
 
-@router_database.post("/users/{user_id}/videos/", response_model=schemas.Video,
-                      tags=["database"])
+@router_database.post("/users/{user_id}/videos/", response_model=schemas.Video)
 def create_item_for_user(user_id: int, video: schemas.VideoCreate,
                          db: Session = Depends(get_db)):
     return crud.create_user_video(db=db, video=video, user_id=user_id)
@@ -160,6 +160,7 @@ def create_item_for_user(user_id: int, video: schemas.VideoCreate,
 
 # include sub router
 app.include_router(router_database)
+app.include_router(login_router)
 
 
 if __name__ == "__main__":
