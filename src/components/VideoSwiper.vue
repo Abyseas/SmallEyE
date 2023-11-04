@@ -10,6 +10,7 @@
 
   const props = defineProps<{
     videoList: API.VideoInfo[]
+    isMask: boolean
   }>()
 
   const muted = ref(true)
@@ -37,10 +38,10 @@
 </script>
 
 <template>
-  <div class="video-swiper-container" :style="`width: ${200}; height: ${200}`">
+  <div class="video-swiper-container">
     <swiper
       ref="swiperRef"
-      class="eye-swiper"
+      :class="props.isMask ? 'eye-swiper mask-swiper' : 'eye-swiper'"
       direction="vertical"
       :mousewheel="{
         thresholdTime: 1000,

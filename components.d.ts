@@ -11,6 +11,7 @@ declare module 'vue' {
     Navigation: typeof import('./src/components/Navigation.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SwiperMask: typeof import('./src/components/SwiperMask.vue')['default']
     VideoCard: typeof import('./src/components/VideoCard.vue')['default']
     VideoSwiper: typeof import('./src/components/VideoSwiper.vue')['default']
   }
