@@ -10,6 +10,7 @@
   }
 
   const muted = ref(true)
+  const activeIdx = ref(0)
   const showVideoSwiper = ref(false)
 
   const handleMutedChange = (event: Event) => {
@@ -19,6 +20,7 @@
 
   const handleClick = (index: number) => {
     console.log(index)
+    activeIdx.value = index
     showVideoSwiper.value = true
   }
 
@@ -44,6 +46,7 @@
     <SwiperMask
       :videoList="videoList"
       :visible="showVideoSwiper"
+      :activeIdx="activeIdx"
       @closeVideoMask="handleCloseVideoMask"
     ></SwiperMask>
   </div>

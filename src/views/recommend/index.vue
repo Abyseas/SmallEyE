@@ -11,7 +11,7 @@
 
 <template>
   <div class="recommend-view">
-    <VideoSwiper :videoList="videoList" :isMask="false"></VideoSwiper>
+    <VideoSwiper :videoList="videoList" :isMask="false" :activeIdx="0"></VideoSwiper>
   </div>
 </template>
 

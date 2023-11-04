@@ -11,6 +11,7 @@
   const props = defineProps<{
     videoList: API.VideoInfo[]
     isMask: boolean
+    activeIdx: number
   }>()
 
   const muted = ref(true)
@@ -49,6 +50,7 @@
       :parallax="true"
       :keyboard="true"
       :modules="modules"
+      :initialSlide="props.activeIdx"
       @slideChange="handleSlideChange"
     >
       <swiper-slide v-for="(item, index) in videoList" :key="item.id">

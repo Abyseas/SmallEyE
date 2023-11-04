@@ -3,6 +3,7 @@
   const props = defineProps<{
     visible: boolean
     videoList: API.VideoInfo[]
+    activeIdx: number
   }>()
   const emit = defineEmits(['closeVideoMask'])
   const videoList = ref<API.VideoInfo[]>(props.videoList)
@@ -34,7 +35,7 @@
     <el-button class="close-button" :icon="Close" @click="handleClose" circle />
     <!-- <el-button class="close-button" @click="handleClose">close</el-button> -->
     <div class="swiper-container">
-      <VideoSwiper :videoList="videoList" :isMask="true"></VideoSwiper>
+      <VideoSwiper :videoList="videoList" :isMask="true" :activeIdx="activeIdx"></VideoSwiper>
     </div>
   </div>
 </template>
