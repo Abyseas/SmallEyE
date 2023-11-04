@@ -5,6 +5,7 @@ qiniu-sv/
 **/node_modules/
 
 # data file
+data/
 *.mp4
-*.db
+#*.db
 *.json

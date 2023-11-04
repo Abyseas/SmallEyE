@@ -3,27 +3,55 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 from app_login import get_password_hash
+from app_utils.aux_tools import q, base_domain, get_outbound_link
+from app_utils.use_type import VideoCategoryType
+
+
+def video_process(video: models.Video):
+    video.video_url = get_outbound_link(video.video_key)
+    video.avatar_url = get_outbound_link(video.avatar_key)
+    video.cover_url = get_outbound_link(video.cover_key)
+
+
+def videos_process(videos: list[models.Video] = None):
+    if videos:
+        for video in videos:
+            video_process(video)
+
+
+def user_videos_process(user: models.User = None):
+    if user:
+        videos_process(user.videos)
 
 
 def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    user_videos_process(user)
+    return user
 
 
 def get_user_by_username(db: Session, username: str):
-    return db.query(models.User).filter(models.User.username == username).first()
+    user = db.query(models.User).filter(models.User.username == username).first()
+    user_videos_process(user)
+    return user
 
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(models.User).filter(models.User.email == email).first()
+    user_videos_process(user)
+    return user
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(models.User).offset(skip).limit(limit).all()
+    users = db.query(models.User).offset(skip).limit(limit).all()
+    for user in users:
+        user_videos_process(user)
+    return users
 
 
 def create_user(db: Session, user: schemas.UserCreate):
-    fake_hashed_password = get_password_hash(user.password)
-    db_user = models.User(username=user.username, email=user.email, hashed_password=fake_hashed_password)
+    hashed_password = get_password_hash(user.password)
+    db_user = models.User(username=user.username, email=user.email, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -31,12 +59,27 @@ def create_user(db: Session, user: schemas.UserCreate):
 
 
 def get_videos(db: Session, skip: int = 0, limit: int = 10):
-    return db.query(models.Video).offset(skip).limit(limit).all()
+    videos = db.query(models.Video).offset(skip).limit(limit).all()
+    videos_process(videos)
+    return videos
+
+
+def get_videos_by_category(db: Session, category: VideoCategoryType):
+    videos = db.query(models.Video).filter(models.Video.category == category).all()
+    videos_process(videos)
+    return videos
+
+
+def get_videos_by_username(db: Session, username: str):
+    videos = db.query(models.Video).filter(models.Video.author == username).all()
+    videos_process(videos)
+    return videos
 
 
 def create_user_video(db: Session, video: schemas.VideoCreate, user_id: int):
-    db_item = models.Video(**video.model_dump(), owner_id=user_id)
-    db.add(db_item)
+    db_video = models.Video(**video.model_dump(), owner_id=user_id)
+    db.add(db_video)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(db_video)
+    video_process(db_video)
+    return db_video

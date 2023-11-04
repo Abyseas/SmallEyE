@@ -1,29 +1,34 @@
 from typing import Union
+from datetime import datetime
 
 from pydantic import BaseModel
+
+from app_utils.use_type import VideoCategoryType
 
 
 class VideoBase(BaseModel):
     title: str
     author: str
-    description: Union[str, None] = None
-    # avatar: str
-    # video_url: str
-    # is_follow: bool
-    # like_num: int
-    # collect_num: int
-    # comment_nu: int
-    # share_num: int
+    category: VideoCategoryType
 
 
 class VideoCreate(VideoBase):
-    pass
+    video_key: str
+    avatar_key: str
+    cover_key: str
 
 
 class Video(VideoBase):
     id: int
     owner_id: int
-    create_time: str
+    create_time: datetime
+    video_url: str
+    avatar_url: str
+    cover_url: str
+    like_count: int
+    collect_count: int
+    comment_count: int
+    share_count: int
 
     class Config:
         orm_mode = True

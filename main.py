@@ -13,7 +13,8 @@ from sqlalchemy.orm import Session
 import qiniu
 
 # self define
-from app_utils.aux_tools import q, bucket, before_upload_data
+from app_utils.aux_tools import q, bucket, before_upload_data, base_domain
+from app_utils.use_type import VideoCategoryType
 from app_db.database import engine, get_db
 from app_db import schemas, crud, models
 from app_login import login_router
@@ -45,8 +46,6 @@ def read_bucket_video_list(bucket_name: str, prefix: Union[str] = None, marker: 
     ret = info = None
     video_list = []
     video_id = 1
-    bucket_domains = bucket.list_domains(bucket_name)
-    base_domain = f"http://{bucket_domains[0][0]}"
     while not eof:
         ret, eof, info = bucket.list(bucket_name, f"{prefix}/video/", marker, limit, delimiter)
         if ret and not ret.get('marker'):
@@ -103,24 +102,22 @@ async def upload_source(bucket_name: str, file: UploadFile = File(), metadata: s
 
     key = f"user@{user_id}/{media_type}/{title}"
     token = q.upload_token(bucket_name)
-    before_upload_data(bucket_name, key)
+    before_upload_data(key)
     ret, info = qiniu.put_data(token, key, file_bytes)
     meta_key = f"user@{user_id}/manifest/{media_type}/{title}.json"
-    before_upload_data(bucket_name, meta_key)
+    before_upload_data(meta_key)
     qiniu.put_data(token, meta_key, metadata)
 
     return ret
 
 
-@app.get("/get_metadata/{bucket_name}/{filename}")
-def read_file_metadata(bucket_name: str, filename: str):
-    key = f"user@1/video/{filename}"
-    ret, info = bucket.stat(bucket_name, key)
-
-    return ret
-
-
 # DataBase operation
+@router_database.get("/users", response_model=list[schemas.User])
+def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
+    users = crud.get_users(db, skip=skip, limit=limit)
+    return users
+
+
 @router_database.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
@@ -129,13 +126,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@router_database.get("/users", response_model=list[schemas.User])
-def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
-    users = crud.get_users(db, skip=skip, limit=limit)
-    return users
-
-
-@router_database.post("/users/", response_model=schemas.User)
+@router_database.post("/users/create", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
@@ -146,22 +137,33 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user=user)
 
 
-@router_database.get("/videos/", response_model=list[schemas.Video])
-def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    items = crud.get_videos(db, skip=skip, limit=limit)
-    return items
+@router_database.get("/videos", response_model=list[schemas.Video])
+def read_videos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    videos = crud.get_videos(db, skip=skip, limit=limit)
+    return videos
 
 
-@router_database.post("/users/{user_id}/videos/", response_model=schemas.Video)
-def create_item_for_user(user_id: int, video: schemas.VideoCreate,
-                         db: Session = Depends(get_db)):
+@router_database.get("/videos/category/{category}", response_model=list[schemas.Video])
+def read_category_videos(category: VideoCategoryType, db: Session = Depends(get_db)):
+    videos = crud.get_videos_by_category(db, category)
+    return videos
+
+
+@router_database.get("/videos/user/{username}", response_model=list[schemas.Video])
+def read_user_videos(username: str, db: Session = Depends(get_db)):
+    videos = crud.get_videos_by_username(db, username)
+    return videos
+
+
+@router_database.post("/videos/{user_id}/create", response_model=schemas.Video)
+def create_video_for_user(user_id: int, video: schemas.VideoCreate,
+                          db: Session = Depends(get_db)):
     return crud.create_user_video(db=db, video=video, user_id=user_id)
 
 
 # include sub router
 app.include_router(router_database)
 app.include_router(login_router)
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
