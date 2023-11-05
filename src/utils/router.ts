@@ -4,6 +4,7 @@ import Home from '@/views/Home.vue'
 import HomePage from '@/views/homePage/index.vue'
 import Recommend from '@/views/recommend/index.vue'
 import UserPage from '@/views/userPage/index.vue'
+import CategoryPage from '@/views/categoryPage/index.vue'
 
 const routes = [
   {
@@ -13,6 +14,7 @@ const routes = [
       { path: '', component: Recommend },
       { path: 'home', component: HomePage },
       { path: 'my', component: UserPage },
+      { path: 'category/:category', component: CategoryPage },
     ],
   },
 ]

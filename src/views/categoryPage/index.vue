@@ -1,15 +1,26 @@
 <script setup lang="ts">
-  import { video } from '@/api/video'
+  import { videoCategory } from '@/api/video'
+  import { useRoute } from 'vue-router'
   import { Waterfall } from 'vue-waterfall-plugin-next'
   import SwiperMask from '@/components/SwiperMask.vue'
   import 'vue-waterfall-plugin-next/dist/style.css'
+
+  const router = useRoute()
   const videoList = ref<API.VideoInfo[]>([])
   const videoListLen = ref(0)
-  const getVideoList = async (lastIdx: number) => {
-    const videoResult = await video(lastIdx)
+
+  const initVideoList = async (lastIdx: number) => {
+    const videoResult = await videoCategory(category.value, lastIdx)
+    videoList.value = videoResult
+    videoListLen.value = videoList.value.length
+  }
+
+  const addVideoList = async (lastIdx: number) => {
+    const videoResult = await videoCategory(category.value, lastIdx)
     videoList.value = videoList.value.concat(videoResult)
     videoListLen.value = videoList.value.length
   }
+  const category = ref('')
   const muted = ref(true)
   const activeIdx = ref(0)
   const showVideoSwiper = ref(false)
@@ -30,11 +41,25 @@
   }
 
   const handleReachEnd = () => {
-    getVideoList(videoListLen.value)
+    addVideoList(videoListLen.value)
   }
 
+  const updateCategory = (value: string | string[]) => {
+    category.value = value as string
+    initVideoList(videoListLen.value)
+  }
+
+  watch(
+    () => router.params.category,
+    (value, oldValue) => {
+      if (value !== oldValue) {
+        updateCategory(value)
+      }
+      console.log('watch')
+    },
+  )
   onMounted(() => {
-    getVideoList(videoListLen.value)
+    updateCategory(router.params.category)
   })
 </script>
 
@@ -43,7 +68,7 @@
     class="home-page-container"
     v-infinite-scroll="
       () => {
-        getVideoList(videoListLen)
+        addVideoList(videoListLen)
       }
     "
     :infinite-scroll-immediate="false"

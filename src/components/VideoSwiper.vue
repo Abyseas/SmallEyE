@@ -13,6 +13,7 @@
     isMask: boolean
     activeIdx: number
   }>()
+  const emit = defineEmits(['reachEnd'])
 
   const muted = ref(true)
 
@@ -35,6 +36,10 @@
         sPlayer.play()
       }
     })
+
+    if (activeIndex >= props.videoList.length - 3) {
+      emit('reachEnd')
+    }
   }
 </script>
 
@@ -58,7 +63,7 @@
           <!-- 作者 -->
           <div class="menuClick">
             <el-tooltip effect="dark" content="进入作者主页" placement="right-start">
-              <el-avatar :size="42" :src="item.avatar" />
+              <el-avatar :size="42" :src="item.avatar_url" />
             </el-tooltip>
             <el-tooltip effect="dark" content="关注" placement="right-start">
               <el-icon class="follow">
@@ -73,7 +78,7 @@
                 <icon-filled-heart></icon-filled-heart>
               </el-icon>
             </el-tooltip>
-            <div class="text">{{ item.like_num }}</div>
+            <div class="text">{{ item.like_count }}</div>
           </div>
           <!-- 评论 -->
           <div class="click-info">
@@ -82,7 +87,7 @@
                 <icon-comment></icon-comment>
               </el-icon>
             </el-tooltip>
-            <div class="text">{{ item.comment_num }}</div>
+            <div class="text">{{ item.comment_count }}</div>
           </div>
           <!-- 收藏 -->
           <div class="click-info">
@@ -91,7 +96,7 @@
                 <icon-star></icon-star>
               </el-icon>
             </el-tooltip>
-            <div class="text">{{ item.collect_num }}</div>
+            <div class="text">{{ item.collect_count }}</div>
           </div>
           <!-- 分享 -->
           <div class="click-info">
@@ -100,11 +105,11 @@
                 <icon-share></icon-share>
               </el-icon>
             </el-tooltip>
-            <!-- <div class="text">{{ item.share_num }}</div> -->
+            <!-- <div class="text">{{ item.share_count }}</div> -->
           </div>
         </div>
         <div class="text-container">
-          <div class="nickname"> @{{ item.nickname ? item.nickname : item.username }} </div>
+          <div class="nickname"> @{{ item.author }} </div>
           <div class="video-title">{{ item.title }}</div>
         </div>
         <video

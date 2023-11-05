@@ -5,12 +5,15 @@
     videoList: API.VideoInfo[]
     activeIdx: number
   }>()
-  const emit = defineEmits(['closeVideoMask'])
+  const emit = defineEmits(['closeVideoMask', 'reachEnd'])
   const videoList = ref<API.VideoInfo[]>(props.videoList)
   const visible = ref(props.visible)
   const handleClose = () => {
     visible.value = false
     emit('closeVideoMask')
+  }
+  const handleReachEnd = () => {
+    emit('reachEnd')
   }
 
   watch(
@@ -35,7 +38,12 @@
     <el-button class="close-button" :icon="Close" @click="handleClose" circle />
     <!-- <el-button class="close-button" @click="handleClose">close</el-button> -->
     <div class="swiper-container">
-      <VideoSwiper :videoList="videoList" :isMask="true" :activeIdx="activeIdx"></VideoSwiper>
+      <VideoSwiper
+        :videoList="videoList"
+        :isMask="true"
+        :activeIdx="activeIdx"
+        @reachEnd="handleReachEnd"
+      ></VideoSwiper>
     </div>
   </div>
 </template>

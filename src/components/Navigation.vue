@@ -25,52 +25,52 @@
   const category_nav_list = [
     {
       label: '生活',
-      url: '/life',
+      url: '/category/life',
       icon: 'life',
     },
     {
       label: '资讯',
-      url: '/news',
+      url: '/category/news',
       icon: 'news',
     },
     {
       label: '科技',
-      url: '/tech',
+      url: '/category/tech',
       icon: 'tech',
     },
     {
       label: '知识',
-      url: '/book',
+      url: '/category/knowledge',
       icon: 'book',
     },
     {
       label: '影视',
-      url: '/movie',
+      url: '/category/movie',
       icon: 'movie',
     },
     {
       label: '时尚',
-      url: '/fashion',
+      url: '/category/fashion',
       icon: 'fashion',
     },
     {
       label: '美食',
-      url: '/food',
+      url: '/category/food',
       icon: 'food',
     },
     {
       label: '游戏',
-      url: '/game',
+      url: '/category/game',
       icon: 'game',
     },
     {
       label: '音乐',
-      url: '/music',
+      url: '/category/music',
       icon: 'music',
     },
     {
       label: '体育',
-      url: '/sport',
+      url: '/category/sport',
       icon: 'sport',
     },
   ]

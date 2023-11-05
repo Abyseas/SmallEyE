@@ -31,7 +31,7 @@
         class="video-content"
         type="video/mp4"
         :src="props.video.video_url"
-        :poster="props.video.thumb"
+        :poster="props.video.cover_url"
         ref="video"
         :muted="props.muted"
         loop
@@ -40,13 +40,13 @@
       ></video>
       <div class="like-container">
         <el-icon class="icon-box"><icon-hollow-heart></icon-hollow-heart></el-icon>
-        <div>{{ props.video.like_num }}</div>
+        <div>{{ props.video.like_count }}</div>
       </div>
     </div>
 
     <div class="video-card-footer">
       <div class="video-title"> {{ props.video.title }} </div>
-      <div class="video-info"> @ {{ props.video.nickname }} - {{ props.video.mtime }}</div>
+      <div class="video-info"> @ {{ props.video.author }} - {{ props.video.create_time }}</div>
     </div>
   </el-card>
 </template>

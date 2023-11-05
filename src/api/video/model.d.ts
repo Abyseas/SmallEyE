@@ -1,25 +1,19 @@
 declare namespace API {
   type VideoInfo = {
     id: number
-    avatar: string
-    username: string
-    nickname: string
-    user_id: number
-    is_follow: number
+    owner_id: number
+    author: string
     title: string
-    thumb: string
+    category: string
+    avatar_url: string
+    cover_url: string
     video_url: string
-    mtime: string
-    like_num: number
-    collect_num: number
-    comment_num: number
-    share_num: number
+    like_count: number
+    collect_count: number
+    comment_count: number
+    share_count: number
+    create_time: string
   }
   /** 登录成功结果 */
-  type VideoResult = {
-    total: number
-    total_page: number
-    current_page: number
-    list: VideoInfo[]
-  }
+  type VideoResult = VideoInfo[]
 }

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import type { AxiosRequestConfig } from 'axios'
-const baseApiURL = 'https://www.fastmock.site/mock/974b3730b92341efc3b88c18c3490fc0/video'
+const baseApiURL = 'http://127.0.0.1:8000/database'
 
 const service = axios.create({
   baseURL: baseApiURL,
