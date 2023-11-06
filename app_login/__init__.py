@@ -70,7 +70,6 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
             raise credentials_exception
         token_data = TokenData(user_id=int(user_id))
     except JWTError as e:
-        print(type(e), e)
         raise credentials_exception
     user = crud.get_user(db, user_id=token_data.user_id)
     if user is None:
@@ -98,6 +97,44 @@ async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@login_router.get("/validate/{access_token}")
+async def validate_register_token(access_token: str, db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        username = payload.get("username")
+        password = payload.get("password")
+        if username is None:
+            raise credentials_exception
+    except JWTError as e:
+        raise credentials_exception
+    # if datetime.utcnow() > expire:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_401_UNAUTHORIZED,
+    #         detail="Token expired",
+    #         headers={"WWW-Authenticate": "Bearer"},
+    #     )
+    user: models.User = authenticate_user(username, password, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    cnt = crud.update_user_by_username(db, username, "is_active", True)
+    return {
+        "code": 200,
+        "message": "User is activated, please login now",
+        "data": {
+            "update_count": cnt
+        }
+    }
 
 
 @login_router.get("/users/me/", response_model=schemas.User)

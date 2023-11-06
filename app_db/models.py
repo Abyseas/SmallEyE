@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, E
 from sqlalchemy.orm import relationship
 
 from .database import Base
-from app_utils.use_type import VideoCategoryType
+from app_utils.custom_schemas import VideoCategoryType
 
 
 class User(Base):

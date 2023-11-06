@@ -34,6 +34,21 @@ pip install python-multipart
 pip install SQLAlchemy
 ```
 
+安装JWT
+
+```bash
+pip install python-jose[cryptography]
+pip install passlib[bcrypt]
+```
+
+安装Yagmail
+
+```bash
+pip install yagmail[all]
+```
+
+
+
 
 
 ### 运行
@@ -42,6 +57,8 @@ pip install SQLAlchemy
 
 ```bash
 uvicorn main:app --reload
+# 以本机ip启动
+uvicorn main:app --reload --host [your local ip]
 ```
 
 交互式API文档

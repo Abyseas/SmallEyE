@@ -1,10 +1,12 @@
 # create, read, update, delete
+from typing import Union
+
 from sqlalchemy.orm import Session
 
 from . import models, schemas
 from app_login import get_password_hash
 from app_utils.aux_tools import q, base_domain, get_outbound_link
-from app_utils.use_type import VideoCategoryType
+from app_utils.custom_schemas import VideoCategoryType
 
 
 def video_process(video: models.Video):
@@ -47,6 +49,18 @@ def get_users(db: Session, skip: int = 0, limit: int = 10):
     for user in users:
         user_videos_process(user)
     return users
+
+
+def update_user_by_username(db: Session, username: str, key: str, value: Union[str, int]):
+    cnt = db.query(models.User).filter(models.User.username == username).update({key: value})
+    db.commit()
+    return cnt
+
+
+def delete_user(db: Session, user_id: int):
+    del_data = db.query(models.User).filter(models.User.id == user_id).delete()
+    db.commit()
+    return del_data
 
 
 def create_user(db: Session, user: schemas.UserCreate):

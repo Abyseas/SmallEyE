@@ -6,18 +6,19 @@ import requests
 
 # fastAPI relate
 import uvicorn
-from fastapi import FastAPI, APIRouter
-from fastapi import Form, File, UploadFile, Depends, HTTPException
+from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import Form, File, UploadFile, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import qiniu
 
 # self define
 from app_utils.aux_tools import q, bucket, before_upload_data, base_domain
-from app_utils.use_type import VideoCategoryType
+from app_utils.custom_schemas import VideoCategoryType
 from app_db.database import engine, get_db
 from app_db import schemas, crud, models
 from app_login import login_router
+from app_login.mail import send_token
 
 # FastAPI application
 app = FastAPI()
@@ -35,8 +36,12 @@ models.Base.metadata.create_all(bind=engine)
 
 
 @app.get("/")
-def read_root():
-    return "Hello FastAPI"
+def read_root(request: Request):
+    print(str(request.url))
+    return {
+        "base_url": request.url.hostname,
+        "nothing": request.base_url
+    }
 
 
 @app.get("/list/{bucket_name}")
@@ -126,15 +131,31 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@router_database.post("/users/create", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+@router_database.delete('/users/{user_id')
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    del_user = crud.delete_user(db, user_id=user_id)
+    if del_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return del_user
+
+
+@router_database.post("/users/register", response_model=schemas.UserResponse)
+async def register_user(user: schemas.UserCreate, request: Request, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="UserName already registered")
-    return crud.create_user(db=db, user=user)
+    validate_url = str(request.base_url) + "login/validate"
+    access_token = send_token(user.email, user.username, user.password, validate_url)
+    db_user = crud.create_user(db=db, user=user)
+    return {
+        "code": 200,
+        "message": "You have successfully registered, please check your email and activate your account.",
+        "data": db_user,
+        "access_token": access_token
+    }
 
 
 @router_database.get("/videos", response_model=list[schemas.Video])

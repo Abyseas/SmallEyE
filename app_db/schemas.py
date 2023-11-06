@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app_utils.use_type import VideoCategoryType
+from app_utils.custom_schemas import VideoCategoryType
 
 
 class VideoBase(BaseModel):
@@ -50,3 +50,14 @@ class User(UserBase):
 
     class Config:
         orm_mode = True
+
+
+class BaseResponse(BaseModel):
+    code: int
+    message: str
+    data: dict
+
+
+class UserResponse(BaseResponse):
+    data: User
+    access_token: str
