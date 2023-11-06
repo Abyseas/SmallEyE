@@ -24,6 +24,7 @@
   const muted = ref(true)
   const activeIdx = ref(0)
   const showVideoSwiper = ref(false)
+  const waterfallRef = ref()
 
   const handleMutedChange = (event: Event) => {
     const player = event.target as HTMLAudioElement
@@ -49,6 +50,24 @@
     initVideoList(videoListLen.value)
   }
 
+  const debounce = (func: Function, delay: number) => {
+    let timer: any
+    return function () {
+      if (timer) {
+        clearTimeout(timer)
+      }
+
+      timer = setTimeout(() => {
+        console.log('func')
+        func()
+      }, delay)
+    }
+  }
+  const handleProgress = debounce(() => {
+    console.log('renderer')
+    waterfallRef.value.renderer()
+  }, 100)
+
   watch(
     () => router.params.category,
     (value, oldValue) => {
@@ -73,13 +92,14 @@
     "
     :infinite-scroll-immediate="false"
   >
-    <Waterfall :list="videoList" :width="300">
+    <Waterfall :list="videoList" :width="300" ref="waterfallRef">
       <template #item="{ item, index }">
         <VideoCard
           :muted="muted"
           :video="item"
           @mutedChange="handleMutedChange"
           @click="handleClick(index)"
+          @progress="handleProgress"
         ></VideoCard>
       </template>
     </Waterfall>

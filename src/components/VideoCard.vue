@@ -5,16 +5,19 @@
     muted: boolean
   }>()
 
-  const emit = defineEmits(['mutedChange'])
+  const emit = defineEmits(['mutedChange', 'progress'])
+  const likeVisible = ref(true)
   const video = ref()
 
   const playVideo = () => {
+    likeVisible.value = false
     video.value.currentTime = 0
     video.value.play()
     video.value.controls = true
   }
 
   const closeVideo = () => {
+    likeVisible.value = true
     video.value.pause()
     video.value.controls = false
     video.value.load()
@@ -22,6 +25,11 @@
 
   const handleVolumeChange = (event: Event) => {
     emit('mutedChange', event)
+  }
+
+  const handleProgress = () => {
+    console.log('progress')
+    emit('progress')
   }
 </script>
 <template>
@@ -37,8 +45,9 @@
         loop
         preload="auto"
         @volumechange="handleVolumeChange"
+        @progress="handleProgress"
       ></video>
-      <div class="like-container">
+      <div class="like-container" v-if="likeVisible">
         <el-icon class="icon-box"><icon-hollow-heart></icon-hollow-heart></el-icon>
         <div>{{ props.video.like_count }}</div>
       </div>

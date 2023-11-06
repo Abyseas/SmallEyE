@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import { register } from '@/api/user'
   import IconUser from '~icons/custom/user'
   import IconKeyboard from '~icons/custom/keyboard'
   import IconCheck from '~icons/custom/check'
@@ -21,7 +22,7 @@
     pass: string
     checkPass: string
     email: string
-    checkCode: string
+    // checkCode: string
   }
   const loginData = reactive<LoginData>({
     name: '',
@@ -32,7 +33,7 @@
     pass: '',
     checkPass: '',
     email: '',
-    checkCode: '',
+    // checkCode: '',
   })
 
   const loginFormRef = ref<InstanceType<typeof FormInstance>>()
@@ -81,10 +82,10 @@
       { required: true, message: '请输入邮箱', trigger: 'blur' },
       { type: 'email', message: '请输入正确的邮箱格式', trigger: ['change', 'blur'] },
     ],
-    checkCode: [{ required: true, message: '验证码不得为空', trigger: 'blur' }],
+    // checkCode: [{ required: true, message: '验证码不得为空', trigger: 'blur' }],
   }
 
-  const handleRegister = (formEL: InstanceType<typeof FormInstance>) => {
+  const handleRegister = async (formEL: InstanceType<typeof FormInstance>) => {
     if (!formEL) return
     formEL.validate((valid: boolean) => {
       if (valid) {
@@ -96,6 +97,15 @@
         return false
       }
     })
+    const user = {
+      username: registerData.name,
+      email: registerData.email,
+      password: registerData.pass,
+    }
+
+    const registerResult = await register(user)
+    console.log(registerResult)
+
     ElMessage({
       message: '注册成功',
       type: 'success',
@@ -195,18 +205,18 @@
                 <template #prefix>
                   <el-icon class="form-icon"><IconEmail /></el-icon>
                 </template>
-                <template #suffix>
+                <!-- <template #suffix>
                   <el-button class="base-button check-button">验证</el-button>
-                </template>
+                </template> -->
               </el-input>
             </el-form-item>
-            <el-form-item class="login-form-item" prop="checkCode">
+            <!-- <el-form-item class="login-form-item" prop="checkCode">
               <el-input v-model="registerData.checkCode" placeholder="请输入邮箱验证码">
                 <template #prefix>
                   <el-icon class="form-icon"><IconCheck /></el-icon>
                 </template>
               </el-input>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
           <el-button class="base-button bottom-button" @click="handleRegister(registerFormRef)"
             >注册</el-button
