@@ -25,10 +25,10 @@ class Video(VideoBase):
     video_url: str
     avatar_url: str
     cover_url: str
-    like_count: int
-    collect_count: int
-    comment_count: int
-    share_count: int
+    like_count: str
+    collect_count: str
+    comment_count: str
+    share_count: str
 
     class Config:
         orm_mode = True
@@ -46,7 +46,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool = False
-    avatar_key: str = 'avatar/0-default_header.png'
+    avatar_url: str
     follow_sum: int
     like_sum: int
     fans_sum: int

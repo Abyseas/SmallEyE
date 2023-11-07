@@ -88,7 +88,7 @@ async def get_current_active_user(current_user: schemas.User = Depends(get_curre
     return current_user
 
 
-@login_router.post("/token")
+@login_router.post("/token", response_model=schemas.BaseResponse)
 async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user: models.User = authenticate_user(form_data.username, form_data.password, db)
     if not user:
@@ -107,17 +107,17 @@ async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
     # return {
-    #     "code": status.HTTP_200_OK,
-    #     "message": "Access token create",
-    #     "data": {
-    #         "access_token": access_token,
-    #         "token_type": "bearer"
-    #     }
-    # }
+    #             "access_token": access_token,
+    #             "token_type": "bearer"
+    #         }
     return {
-                "access_token": access_token,
-                "token_type": "bearer"
-            }
+        "code": status.HTTP_200_OK,
+        "message": "Access token create",
+        "data": {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    }
 
 
 @login_router.get("/validate/{register_token}", response_model=schemas.BaseResponse)

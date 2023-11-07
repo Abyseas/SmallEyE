@@ -160,7 +160,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         )
     return {
         "code": status.HTTP_200_OK,
-        "message": f"Get user {user_id} info successfully",
+        "message": f"Delete user {user_id} info successfully",
         "data": {}
     }
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from . import models, schemas
 from app_login import get_password_hash
-from app_utils.aux_tools import q, base_domain, get_outbound_link
+from app_utils.aux_tools import q, base_domain, get_outbound_link, format_number
 from app_utils.custom_schemas import VideoCategoryType
 
 
@@ -13,6 +13,10 @@ def video_process(video: models.Video):
     video.video_url = get_outbound_link(video.video_key)
     video.avatar_url = get_outbound_link(video.avatar_key)
     video.cover_url = get_outbound_link(video.cover_key)
+    video.like_count = format_number(video.like_cnt)
+    video.collect_count = format_number(video.collect_cnt)
+    video.comment_count = format_number(video.comment_cnt)
+    video.share_count = format_number(video.share_cnt)
 
 
 def videos_process(videos: list[models.Video] = None):
@@ -21,33 +25,37 @@ def videos_process(videos: list[models.Video] = None):
             video_process(video)
 
 
-def user_videos_process(user: models.User = None):
+def user_process(user: models.User = None):
     if user:
+        user.avatar_url = get_outbound_link(user.avatar_key)
+        user.follow_sum = format_number(user.follow_cnt)
+        user.like_sum = format_number(user.like_cnt)
+        user.fans_sum = format_number(user.fans_cnt)
         videos_process(user.videos)
 
 
 def get_user(db: Session, user_id: int):
     user = db.query(models.User).filter(models.User.id == user_id).first()
-    user_videos_process(user)
+    user_process(user)
     return user
 
 
 def get_user_by_username(db: Session, username: str):
     user = db.query(models.User).filter(models.User.username == username).first()
-    user_videos_process(user)
+    user_process(user)
     return user
 
 
 def get_user_by_email(db: Session, email: str):
     user = db.query(models.User).filter(models.User.email == email).first()
-    user_videos_process(user)
+    user_process(user)
     return user
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 10):
     users = db.query(models.User).offset(skip).limit(limit).all()
     for user in users:
-        user_videos_process(user)
+        user_process(user)
     return users
 
 
@@ -69,13 +77,14 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    user_process(db_user)
     return db_user
 
 
 def get_videos(db: Session, skip: int = 0, limit: int = 10, is_recommend: bool = False):
     query_res = db.query(models.Video)
     if is_recommend:
-        query_res = query_res.order_by(models.Video.like_count.desc())
+        query_res = query_res.order_by(models.Video.like_cnt.desc())
     else:
         query_res = query_res.order_by(models.Video.create_time.desc())
     videos = query_res.offset(skip).limit(limit).all()
@@ -87,7 +96,7 @@ def get_videos_by_category(db: Session, category: VideoCategoryType, skip: int =
                            limit: int = 10, is_recommend: bool = False):
     query_res = db.query(models.Video).filter(models.Video.category == category)
     if is_recommend:
-        query_res = query_res.order_by(models.Video.like_count.desc())
+        query_res = query_res.order_by(models.Video.like_cnt.desc())
     else:
         query_res = query_res.order_by(models.Video.create_time.desc())
     videos = query_res.offset(skip).limit(limit).all()
@@ -99,7 +108,7 @@ def get_videos_by_username(db: Session, username: str, skip: int = 0, limit: int
                            is_recommend: bool = False):
     query_res = db.query(models.Video).filter(models.Video.author == username)
     if is_recommend:
-        query_res = query_res.order_by(models.Video.like_count.desc())
+        query_res = query_res.order_by(models.Video.like_cnt.desc())
     else:
         query_res = query_res.order_by(models.Video.create_time.desc())
     videos = query_res.offset(skip).limit(limit).all()
