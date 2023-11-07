@@ -56,9 +56,25 @@
       .click-info {
         position: relative;
         margin-bottom: 20px;
+        height: 60px;
+
+        .info-icon-container {
+          height: 28px;
+          .collectd-icon {
+            color:#ffe628
+          }
+          .liked-icon {
+            color:  #fe2c55;
+          }
+        }
+
         i {
           font-size: @swiper-icon-size;
           color: #fff;
+
+          &:hover {
+            font-size: @swiper-hover-icon-size;
+          }
         }
         .text {
           color: #fff;

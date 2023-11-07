@@ -13,7 +13,7 @@
     if (loading.value === true) {
       loading.value = false
     }
-    videoList.value = videoList.value.concat(videoResult)
+    videoList.value = videoList.value.concat(videoResult.data)
     videoListLen.value = videoList.value.length
   }
   const muted = ref(true)
@@ -27,8 +27,7 @@
     muted.value = player.muted
   }
 
-  const handleClick = (index: number) => {
-    console.log(index)
+  const handleClick = (index: number) => { 
     activeIdx.value = index
     showVideoSwiper.value = true
   }
@@ -48,8 +47,7 @@
         clearTimeout(timer)
       }
 
-      timer = setTimeout(() => {
-        console.log('func')
+      timer = setTimeout(() => { 
         func()
       }, delay)
     }

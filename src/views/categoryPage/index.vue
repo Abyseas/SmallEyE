@@ -11,13 +11,13 @@
 
   const initVideoList = async (lastIdx: number) => {
     const videoResult = await videoCategory(category.value, lastIdx)
-    videoList.value = videoResult
+    videoList.value = videoResult.data
     videoListLen.value = videoList.value.length
   }
 
   const addVideoList = async (lastIdx: number) => {
     const videoResult = await videoCategory(category.value, lastIdx)
-    videoList.value = videoList.value.concat(videoResult)
+    videoList.value = videoList.value.concat(videoResult.data)
     videoListLen.value = videoList.value.length
   }
   const category = ref('')
@@ -31,8 +31,7 @@
     muted.value = player.muted
   }
 
-  const handleClick = (index: number) => {
-    console.log(index)
+  const handleClick = (index: number) => { 
     activeIdx.value = index
     showVideoSwiper.value = true
   }
@@ -58,7 +57,6 @@
       }
 
       timer = setTimeout(() => {
-        console.log('func')
         func()
       }, delay)
     }
@@ -73,8 +71,7 @@
     (value, oldValue) => {
       if (value !== oldValue) {
         updateCategory(value)
-      }
-      console.log('watch')
+      } 
     },
   )
   onMounted(() => {

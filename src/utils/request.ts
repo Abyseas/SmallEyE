@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { AxiosRequestConfig } from 'axios'
-const baseApiURL = 'http://127.0.0.1:8000/database'
+import { storage } from './common'
+const baseApiURL = 'http://127.0.0.1:8000'
 
 const service = axios.create({
   baseURL: baseApiURL,
@@ -19,6 +20,17 @@ service.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+service.interceptors.request.use( (config) => {
+    const token = storage.get('token')
+    if(token) {
+      config.headers.Authorization =  `${token.token_type} ${token.access_token}`
+    }
+    return config
+  },   
+  (error) => {
+  return Promise.reject(error)
+},) 
+
 
 export type Response<T = any> = {
   code: number

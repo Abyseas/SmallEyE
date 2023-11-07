@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import { h } from 'vue'
+  import {userInfo} from '@/api/user'
   import { ElDivider } from 'element-plus'
   const props = defineProps<{
     avatarSrc: string
@@ -21,6 +22,15 @@
     class: 'user-divider',
     direction: 'vertical',
     style: { borderLeft: '1px solid rgba(242,242,243, 0.1)' },
+  })
+
+  const getUserInfo = async () => {
+    const userInfoResult = await userInfo()
+    console.log(userInfoResult)
+  }
+
+  onMounted(() => {
+    getUserInfo()
   })
 </script>
 

@@ -5,7 +5,7 @@
 
   const getVideoList = async (lastIdx: number) => {
     const videoResult = await video(lastIdx, 10)
-    videoList.value = videoList.value.concat(videoResult)
+    videoList.value = videoList.value.concat(videoResult.data)
     videoListLen.value = videoList.value.length
   }
 

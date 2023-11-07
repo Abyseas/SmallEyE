@@ -28,7 +28,6 @@
   }
 
   const handleProgress = () => {
-    console.log('progress')
     emit('progress')
   }
 </script>
@@ -43,7 +42,7 @@
         ref="video"
         :muted="props.muted"
         loop
-        preload="auto"
+        preload="metadata"
         @volumechange="handleVolumeChange"
         @progress="handleProgress"
       ></video>

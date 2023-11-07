@@ -14,7 +14,8 @@
     activeIdx: number
   }>()
   const emit = defineEmits(['reachEnd'])
-
+  const liked = ref(false)
+  const collected = ref(false)
   const muted = ref(true)
 
   const modules = [Navigation, Mousewheel, Keyboard]
@@ -40,6 +41,14 @@
     if (activeIndex >= props.videoList.length - 3) {
       emit('reachEnd')
     }
+  }
+
+  const switchCollect = () => {
+    collected.value = !collected.value
+  }
+
+  const switchLike = () => {
+    liked.value = !liked.value
   }
 </script>
 
@@ -73,39 +82,47 @@
           </div>
           <!-- 点赞 -->
           <div class="click-info">
-            <el-tooltip effect="dark" content="点赞" placement="right-start">
-              <el-icon>
-                <icon-filled-heart></icon-filled-heart>
-              </el-icon>
-            </el-tooltip>
+            <div class="info-icon-container">
+              <el-tooltip effect="dark" content="点赞" placement="right-start" >
+                <el-icon :class="liked ? 'liked-icon' : ''"  @click="switchLike">
+                  <icon-filled-heart></icon-filled-heart>
+                </el-icon>
+              </el-tooltip>
+            </div>
             <div class="text">{{ item.like_count }}</div>
           </div>
           <!-- 评论 -->
           <div class="click-info">
-            <el-tooltip effect="dark" content="评论" placement="right-start">
-              <el-icon>
-                <icon-comment></icon-comment>
-              </el-icon>
-            </el-tooltip>
+            <div class="info-icon-container">
+              <el-tooltip effect="dark" content="评论" placement="right-start">
+                <el-icon >
+                  <icon-comment></icon-comment>
+                </el-icon>
+              </el-tooltip>
+            </div>
             <div class="text">{{ item.comment_count }}</div>
           </div>
           <!-- 收藏 -->
           <div class="click-info">
-            <el-tooltip effect="dark" content="收藏" placement="right-start">
-              <el-icon>
-                <icon-star></icon-star>
-              </el-icon>
-            </el-tooltip>
+            <div class="info-icon-container" >
+              <el-tooltip effect="dark" content="收藏" placement="right-start">
+                <el-icon :class="collected ? 'collectd-icon' : ''" @click="switchCollect">
+                  <icon-star></icon-star>
+                </el-icon>
+              </el-tooltip>
+            </div>
             <div class="text">{{ item.collect_count }}</div>
           </div>
           <!-- 分享 -->
           <div class="click-info">
-            <el-tooltip effect="dark" content="分享" placement="right-start">
-              <el-icon>
-                <icon-share></icon-share>
-              </el-icon>
-            </el-tooltip>
-            <!-- <div class="text">{{ item.share_count }}</div> -->
+            <div class="info-icon-container"> 
+              <el-tooltip effect="dark" content="分享" placement="right-start">
+                <el-icon>
+                  <icon-share></icon-share>
+                </el-icon>
+              </el-tooltip>
+            </div>
+            <div class="text">{{ item.share_count }}</div>
           </div>
         </div>
         <div class="text-container">
@@ -118,7 +135,7 @@
           :id="`player${index}`"
           :src="item.video_url"
           :muted="muted"
-          preload="auto"
+          preload="metadata"
           autoplay
           controls
           loop

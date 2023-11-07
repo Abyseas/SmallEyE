@@ -1,12 +1,12 @@
-// import type { BaseResponse } from '@/utils/request'
+import type { BaseResponse } from '@/utils/request'
 import { request } from '@/utils/request'
 /**
  * @description 获取视频
  * @returns
  */
 export function video(skip: number, limit: number = 20) {
-  return request<API.VideoResult>({
-    url: `videos?skip=${skip}&limit=${limit}`,
+  return request<BaseResponse<API.VideoResult>>({
+    url: `database/videos?skip=${skip}&limit=${limit}`,
     method: 'get',
   })
 }
@@ -18,8 +18,8 @@ export function video(skip: number, limit: number = 20) {
 // }
 
 export function videoCategory(category: string, skip: number, limit: number = 20) {
-  return request<API.VideoResult>({
-    url: `videos/category/${category}`,
+  return request<BaseResponse<API.VideoResult>>({
+    url: `database/videos/category/${category}`,
     method: 'get',
   })
 }

@@ -1,17 +1,32 @@
 <script setup lang="ts">
-  import { register } from '@/api/user'
+  import { register, login } from '@/api/user'
+  import cloneDeep from 'lodash/cloneDeep'
   import IconUser from '~icons/custom/user'
   import IconKeyboard from '~icons/custom/keyboard'
   import IconCheck from '~icons/custom/check'
   import IconEmail from '~icons/custom/email'
   import type { FormInstance } from 'element-plus'
   import { ElMessage } from 'element-plus'
+  import { getExceptionMessage, storage } from '@/utils/common'
+
+  const EMPTY_REGISTER_DATA = {
+    name: '',
+    pass: '',
+    checkPass: '',
+    email: '',
+  }
+  
+  const EMPTY_LOGIN_DATA = {
+    name: '',
+    pass: ''
+  }
 
   const props = defineProps({
     visible: Boolean,
   })
   const visible = ref(props.visible)
-  const emit = defineEmits(['closeLogin'])
+  const registerSuccess = ref(false)
+  const emit = defineEmits(['closeLogin', 'loginSuccess'])
   type LoginData = {
     name: string
     pass: string
@@ -24,22 +39,14 @@
     email: string
     // checkCode: string
   }
-  const loginData = reactive<LoginData>({
-    name: '',
-    pass: '',
-  })
-  const registerData = reactive<RegisterData>({
-    name: '',
-    pass: '',
-    checkPass: '',
-    email: '',
-    // checkCode: '',
-  })
-
+  const loginData = ref<LoginData>(cloneDeep(EMPTY_LOGIN_DATA))
+  const registerData = ref<RegisterData>(cloneDeep(EMPTY_REGISTER_DATA))
   const loginFormRef = ref<InstanceType<typeof FormInstance>>()
-  const registerFormRef = ref<InstanceType<typeof FormInstance>>()
+  const registerFormRef = ref<InstanceType<typeof FormInstance>>() 
 
   const closeDialog = () => {
+    loginData.value =  cloneDeep(EMPTY_LOGIN_DATA)
+    registerData.value = cloneDeep(EMPTY_REGISTER_DATA)
     emit('closeLogin')
   }
 
@@ -81,8 +88,7 @@
     email: [
       { required: true, message: '请输入邮箱', trigger: 'blur' },
       { type: 'email', message: '请输入正确的邮箱格式', trigger: ['change', 'blur'] },
-    ],
-    // checkCode: [{ required: true, message: '验证码不得为空', trigger: 'blur' }],
+    ] 
   }
 
   const handleRegister = async (formEL: InstanceType<typeof FormInstance>) => {
@@ -98,21 +104,40 @@
       }
     })
     const user = {
-      username: registerData.name,
-      email: registerData.email,
-      password: registerData.pass,
+      username: registerData.value.name,
+      email: registerData.value.email,
+      password: registerData.value.pass,
     }
 
-    const registerResult = await register(user)
-    console.log(registerResult)
+    try {
+      const registerResult = await register(user)
+      if(registerResult.code === 200) {
+          ElMessage({
+          message: '注册成功',
+          type: 'success',
+        })
 
-    ElMessage({
-      message: '注册成功',
-      type: 'success',
-    })
+        registerSuccess.value = true;
+        setTimeout(() => {
+          //clear form data
+          registerData.value = JSON.parse(JSON.stringify(EMPTY_REGISTER_DATA))
+          registerSuccess.value = false;
+        }, 3000)
+      } else {
+          ElMessage({
+          message: getExceptionMessage(registerResult.code),
+          type: 'error',
+        })
+      }
+    } catch (error: any) {
+      ElMessage({
+        message: error.response.data.detail,
+        type: 'error',
+      })
+    }
   }
 
-  const handleLogin = (formEL: InstanceType<typeof FormInstance>) => {
+  const handleLogin = async (formEL: InstanceType<typeof FormInstance>) => {
     if (!formEL) return
     formEL.validate((valid: boolean) => {
       if (valid) {
@@ -124,18 +149,44 @@
         return false
       }
     })
-    ElMessage({
-      message: '登录成功',
-      type: 'success',
-    })
+
+    const user = {
+      username: loginData.value.name,
+      password: loginData.value.pass,
+    }
+
+    try {
+      const loginResult = await login(user)
+      if(loginResult.code === 200) {
+          ElMessage({
+          message: '登录成功',
+          type: 'success',
+        })
+
+        storage.set('token', loginResult.data)
+        storage.set('username', user.username)
+        storage.set('tokenStartTime', new Date().getTime())
+        emit("loginSuccess")
+        visible.value = false
+        closeDialog()
+      } else {
+          ElMessage({
+          message:  getExceptionMessage(loginResult.code),
+          type: 'error',
+        })
+      }
+    } catch (error: any) {
+      ElMessage({
+        message: error.response.data.detail,
+        type: 'error',
+      })
+    }
   }
 
   watch(
     () => props.visible,
     (value: boolean) => {
-      if (value === true) {
-        visible.value = true
-      }
+      visible.value = value
     },
   )
 </script>
@@ -174,53 +225,56 @@
           <template #label>
             <span class="custom-tabs-label"> 用户注册 </span>
           </template>
-          <el-form :model="registerData" :rules="registerRules" ref="registerFormRef" status-icon>
-            <el-form-item class="login-form-item" prop="name">
-              <el-input v-model="registerData.name" placeholder="用户名">
-                <template #prefix>
-                  <el-icon class="form-icon"> <IconUser /></el-icon>
-                </template>
-              </el-input>
-            </el-form-item>
-            <el-form-item class="login-form-item" prop="pass">
-              <el-input v-model="registerData.pass" type="password" placeholder="请输入密码">
-                <template #prefix>
-                  <el-icon class="form-icon"><IconKeyboard /></el-icon>
-                </template>
-              </el-input>
-            </el-form-item>
-            <el-form-item class="login-form-item" prop="checkPass">
-              <el-input
-                v-model="registerData.checkPass"
-                type="password"
-                placeholder="请再次输入密码"
-              >
-                <template #prefix>
-                  <el-icon class="form-icon"><IconKeyboard /></el-icon>
-                </template>
-              </el-input>
-            </el-form-item>
-            <el-form-item class="login-form-item" prop="email">
-              <el-input v-model="registerData.email" placeholder="请输入邮箱">
-                <template #prefix>
-                  <el-icon class="form-icon"><IconEmail /></el-icon>
-                </template>
-                <!-- <template #suffix>
-                  <el-button class="base-button check-button">验证</el-button>
-                </template> -->
-              </el-input>
-            </el-form-item>
-            <!-- <el-form-item class="login-form-item" prop="checkCode">
-              <el-input v-model="registerData.checkCode" placeholder="请输入邮箱验证码">
-                <template #prefix>
-                  <el-icon class="form-icon"><IconCheck /></el-icon>
-                </template>
-              </el-input>
-            </el-form-item> -->
-          </el-form>
-          <el-button class="base-button bottom-button" @click="handleRegister(registerFormRef)"
-            >注册</el-button
-          >
+          <div v-if="!registerSuccess">
+            <el-form   :model="registerData" :rules="registerRules" ref="registerFormRef" status-icon>
+              <el-form-item class="login-form-item" prop="name">
+                <el-input v-model="registerData.name" placeholder="用户名">
+                  <template #prefix>
+                    <el-icon class="form-icon"> <IconUser /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+              <el-form-item class="login-form-item" prop="pass">
+                <el-input v-model="registerData.pass" type="password" placeholder="请输入密码">
+                  <template #prefix>
+                    <el-icon class="form-icon"><IconKeyboard /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+              <el-form-item class="login-form-item" prop="checkPass">
+                <el-input
+                  v-model="registerData.checkPass"
+                  type="password"
+                  placeholder="请再次输入密码"
+                >
+                  <template #prefix>
+                    <el-icon class="form-icon"><IconKeyboard /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+              <el-form-item class="login-form-item" prop="email">
+                <el-input v-model="registerData.email" placeholder="请输入邮箱">
+                  <template #prefix>
+                    <el-icon class="form-icon"><IconEmail /></el-icon>
+                  </template>
+                  <!-- <template #suffix>
+                    <el-button class="base-button check-button">验证</el-button>
+                  </template> -->
+                </el-input>
+              </el-form-item>
+              <!-- <el-form-item class="login-form-item" prop="checkCode">
+                <el-input v-model="registerData.checkCode" placeholder="请输入邮箱验证码">
+                  <template #prefix>
+                    <el-icon class="form-icon"><IconCheck /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item> -->
+            </el-form>
+            <el-button class="base-button bottom-button" @click="handleRegister(registerFormRef)">注册</el-button>
+          </div>
+          <div v-else style="height: 158px; ">
+             <h3>请去邮箱进行验证，验证成功后即可登录</h3>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-card>
