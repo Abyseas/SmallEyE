@@ -141,11 +141,11 @@ def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
 @router_database.get("/users/{user_id}", response_model=schemas.UserResponse)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise ResException(
-            code=ExceptionCode.USER_NOT_FOUND,
-            error=f"User with id {user_id} not found"
-        )
+    # if db_user is None:
+    #     raise ResException(
+    #         code=ExceptionCode.USER_NOT_FOUND,
+    #         error=f"User with id {user_id} not found"
+    #     )
     return {
         "code": status.HTTP_200_OK,
         "message": f"Get user {user_id} info successfully",
@@ -192,11 +192,11 @@ async def register_user(user: schemas.UserCreate, request: Request, db: Session 
 @router_database.get("/videos", response_model=schemas.VideoResponse)
 def read_videos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     videos = crud.get_videos(db, skip=skip, limit=limit)
-    if len(videos) == 0:
-        raise ResException(
-            code=ExceptionCode.VIDEO_NOT_FOUND,
-            error=f"Videos not found"
-        )
+    # if len(videos) == 0:
+    #     raise ResException(
+    #         code=ExceptionCode.VIDEO_NOT_FOUND,
+    #         error=f"Videos not found"
+    #     )
     return {
         "code": status.HTTP_200_OK,
         "message": "You have successfully get videos info",
@@ -208,11 +208,11 @@ def read_videos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 def read_category_videos(category: VideoCategoryType, skip: int = 0, limit: int = 10,
                          db: Session = Depends(get_db)):
     videos = crud.get_videos_by_category(db, category, skip, limit)
-    if len(videos) == 0:
-        raise ResException(
-            code=ExceptionCode.VIDEO_NOT_FOUND,
-            error=f"Videos not found"
-        )
+    # if len(videos) == 0:
+    #     raise ResException(
+    #         code=ExceptionCode.VIDEO_NOT_FOUND,
+    #         error=f"Videos not found"
+    #     )
     return {
         "code": status.HTTP_200_OK,
         "message": f"You have successfully get {category} videos info",
@@ -224,11 +224,11 @@ def read_category_videos(category: VideoCategoryType, skip: int = 0, limit: int 
 def read_user_videos(username: str, skip: int = 0, limit: int = 10,
                      db: Session = Depends(get_db)):
     videos = crud.get_videos_by_username(db, username, skip, limit)
-    if len(videos) == 0:
-        raise ResException(
-            code=ExceptionCode.VIDEO_NOT_FOUND,
-            error=f"Videos not found"
-        )
+    # if len(videos) == 0:
+    #     raise ResException(
+    #         code=ExceptionCode.VIDEO_NOT_FOUND,
+    #         error=f"Videos not found"
+    #     )
     return {
         "code": status.HTTP_200_OK,
         "message": f"You have successfully get {username} videos info",

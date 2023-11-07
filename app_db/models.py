@@ -7,6 +7,10 @@ from .database import Base
 from app_utils.custom_schemas import VideoCategoryType
 
 
+def calc_sort_score(context):
+    print(type(context))
+
+
 class User(Base):
     """
     用户表
@@ -44,6 +48,7 @@ class Video(Base):
     collect_count = Column(Integer, default=0)
     comment_count = Column(Integer, default=0)
     share_count = Column(Integer, default=0)
+    # sort_score = Column(Integer, default=calc_sort_score)
     owner_id = Column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="videos")
