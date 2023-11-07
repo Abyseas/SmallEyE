@@ -72,24 +72,37 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def get_videos(db: Session, skip: int = 0, limit: int = 10):
-    videos = db.query(models.Video).order_by(models.Video.like_count.desc())\
-        .offset(skip).limit(limit).all()
+def get_videos(db: Session, skip: int = 0, limit: int = 10, is_recommend: bool = False):
+    query_res = db.query(models.Video)
+    if is_recommend:
+        query_res = query_res.order_by(models.Video.like_count.desc())
+    else:
+        query_res = query_res.order_by(models.Video.create_time.desc())
+    videos = query_res.offset(skip).limit(limit).all()
     videos_process(videos)
     return videos
 
 
 def get_videos_by_category(db: Session, category: VideoCategoryType, skip: int = 0,
-                           limit: int = 10):
-    videos = db.query(models.Video).filter(models.Video.category == category).\
-        order_by(models.Video.like_count.desc()).offset(skip).limit(limit).all()
+                           limit: int = 10, is_recommend: bool = False):
+    query_res = db.query(models.Video).filter(models.Video.category == category)
+    if is_recommend:
+        query_res = query_res.order_by(models.Video.like_count.desc())
+    else:
+        query_res = query_res.order_by(models.Video.create_time.desc())
+    videos = query_res.offset(skip).limit(limit).all()
     videos_process(videos)
     return videos
 
 
-def get_videos_by_username(db: Session, username: str, skip: int = 0, limit: int = 0):
-    videos = db.query(models.Video).filter(models.Video.author == username)\
-        .order_by(models.Video.like_count.desc()).offset(skip).limit(limit).all()
+def get_videos_by_username(db: Session, username: str, skip: int = 0, limit: int = 0,
+                           is_recommend: bool = False):
+    query_res = db.query(models.Video).filter(models.Video.author == username)
+    if is_recommend:
+        query_res = query_res.order_by(models.Video.like_count.desc())
+    else:
+        query_res = query_res.order_by(models.Video.create_time.desc())
+    videos = query_res.offset(skip).limit(limit).all()
     videos_process(videos)
     return videos
 

@@ -190,8 +190,8 @@ async def register_user(user: schemas.UserCreate, request: Request, db: Session 
 
 
 @router_database.get("/videos", response_model=schemas.VideoResponse)
-def read_videos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
-    videos = crud.get_videos(db, skip=skip, limit=limit)
+def read_videos(skip: int = 0, limit: int = 10, is_recommend: bool = False, db: Session = Depends(get_db)):
+    videos = crud.get_videos(db, skip, limit, is_recommend)
     # if len(videos) == 0:
     #     raise ResException(
     #         code=ExceptionCode.VIDEO_NOT_FOUND,
@@ -206,8 +206,8 @@ def read_videos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
 
 @router_database.get("/videos/category/{category}", response_model=schemas.VideoResponse)
 def read_category_videos(category: VideoCategoryType, skip: int = 0, limit: int = 10,
-                         db: Session = Depends(get_db)):
-    videos = crud.get_videos_by_category(db, category, skip, limit)
+                         is_recommend: bool = False, db: Session = Depends(get_db)):
+    videos = crud.get_videos_by_category(db, category, skip, limit, is_recommend)
     # if len(videos) == 0:
     #     raise ResException(
     #         code=ExceptionCode.VIDEO_NOT_FOUND,
@@ -221,9 +221,9 @@ def read_category_videos(category: VideoCategoryType, skip: int = 0, limit: int 
 
 
 @router_database.get("/videos/user/{username}", response_model=schemas.VideoResponse)
-def read_user_videos(username: str, skip: int = 0, limit: int = 10,
+def read_user_videos(username: str, skip: int = 0, limit: int = 10, is_recommend: bool = False,
                      db: Session = Depends(get_db)):
-    videos = crud.get_videos_by_username(db, username, skip, limit)
+    videos = crud.get_videos_by_username(db, username, skip, limit, is_recommend)
     # if len(videos) == 0:
     #     raise ResException(
     #         code=ExceptionCode.VIDEO_NOT_FOUND,
