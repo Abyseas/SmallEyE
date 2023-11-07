@@ -11,22 +11,22 @@ declare namespace API {
     username: string
     email?: string
     password: string
-  } 
+  }
 
   type UserInfoResult = {
     username: string
     email: string
     id: number
     is_active: boolean
-    follow_sum: 0,
-    like_sum: 0,
-    fans_sum: 0,
+    follow_sum: number
+    like_sum: number
+    fans_sum: number
+    avatar_url: string
     videos: API.VideoInfo[]
   }
 
   type LoginResult = {
-    accessToken: string,
+    accessToken: string
     tokenType: string
   }
 }
-

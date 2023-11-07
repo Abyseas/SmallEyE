@@ -96,6 +96,7 @@
         userDetails.value.follow_num = userInfoResult.data.follow_sum
         userDetails.value.fans_num = userInfoResult.data.fans_sum
         userDetails.value.videoList = userInfoResult.data.videos
+        userDetails.value.avatar_url = userInfoResult.data.avatar_url
       } else {
         ElMessage({
           message: getExceptionMessage(userInfoResult.code),
@@ -334,7 +335,6 @@
       max-width: 600px;
       height: 50%;
       width: 50%;
-      text-align: center;
       .el-dialog__headerbtn:hover .el-dialog__close {
         color: #fff;
       }
