@@ -78,14 +78,17 @@ def get_videos(db: Session, skip: int = 0, limit: int = 10):
     return videos
 
 
-def get_videos_by_category(db: Session, category: VideoCategoryType):
-    videos = db.query(models.Video).filter(models.Video.category == category).all()
+def get_videos_by_category(db: Session, category: VideoCategoryType, skip: int = 0,
+                           limit: int = 10):
+    videos = db.query(models.Video).filter(models.Video.category == category)\
+        .offset(skip).limit(limit).all()
     videos_process(videos)
     return videos
 
 
-def get_videos_by_username(db: Session, username: str):
-    videos = db.query(models.Video).filter(models.Video.author == username).all()
+def get_videos_by_username(db: Session, username: str, skip: int = 0, limit: int = 0):
+    videos = db.query(models.Video).filter(models.Video.author == username)\
+        .offset(skip).limit(limit).all()
     videos_process(videos)
     return videos
 
