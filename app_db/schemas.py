@@ -46,6 +46,9 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool = False
+    follow_sum: int
+    like_sum: int
+    fans_sum: int
     videos: list[Video] = []
 
     class Config:
@@ -55,9 +58,12 @@ class User(UserBase):
 class BaseResponse(BaseModel):
     code: int
     message: str
-    data: dict
+    data: dict = None
 
 
 class UserResponse(BaseResponse):
-    data: User
-    access_token: str
+    data: Union[User, list[User]]
+
+
+class VideoResponse(BaseResponse):
+    data: Union[Video, list[Video]]

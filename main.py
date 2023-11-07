@@ -6,8 +6,9 @@ import requests
 
 # fastAPI relate
 import uvicorn
-from fastapi import FastAPI, APIRouter, HTTPException, Request
+from fastapi import FastAPI, APIRouter, HTTPException, Request, status
 from fastapi import Form, File, UploadFile, Depends
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 import qiniu
@@ -15,6 +16,7 @@ import qiniu
 # self define
 from app_utils.aux_tools import q, bucket, before_upload_data, base_domain
 from app_utils.custom_schemas import VideoCategoryType
+from app_utils.exception import ResException, ExceptionCode
 from app_db.database import engine, get_db
 from app_db import schemas, crud, models
 from app_login import login_router
@@ -35,13 +37,22 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=engine)
 
 
+@app.exception_handler(ResException)
+async def res_exception_handler(request: Request, exc: ResException):
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "code": exc.code,
+            "message": exc.error
+        },
+        headers=exc.headers
+    )
+
+
 @app.get("/")
-def read_root(request: Request):
-    print(str(request.url))
-    return {
-        "base_url": request.url.hostname,
-        "nothing": request.base_url
-    }
+def read_root(request: Request, db: Session = Depends(get_db)):
+    user = crud.get_user(db, user_id=1)
+    return 123
 
 
 @app.get("/list/{bucket_name}")
@@ -117,33 +128,54 @@ async def upload_source(bucket_name: str, file: UploadFile = File(), metadata: s
 
 
 # DataBase operation
-@router_database.get("/users", response_model=list[schemas.User])
+@router_database.get("/users", response_model=schemas.UserResponse)
 def read_users(db: Session = Depends(get_db), skip: int = 0, limit: int = 10):
     users = crud.get_users(db, skip=skip, limit=limit)
-    return users
+    return {
+        "code": status.HTTP_200_OK,
+        "message": f"Get users info successfully",
+        "data": users
+    }
 
 
-@router_database.get("/users/{user_id}", response_model=schemas.User)
+@router_database.get("/users/{user_id}", response_model=schemas.UserResponse)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+        raise ResException(
+            code=ExceptionCode.USER_NOT_FOUND,
+            error=f"User with id {user_id} not found"
+        )
+    return {
+        "code": status.HTTP_200_OK,
+        "message": f"Get user {user_id} info successfully",
+        "data": db_user
+    }
 
 
-@router_database.delete('/users/{user_id')
+@router_database.delete('/users/{user_id}', response_model=schemas.BaseResponse)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     del_user = crud.delete_user(db, user_id=user_id)
     if del_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return del_user
+        raise ResException(
+            code=ExceptionCode.USER_NOT_FOUND,
+            error=f"User with id {user_id} not found"
+        )
+    return {
+        "code": status.HTTP_200_OK,
+        "message": f"Get user {user_id} info successfully",
+        "data": {}
+    }
 
 
 @router_database.post("/users/register", response_model=schemas.UserResponse)
 async def register_user(user: schemas.UserCreate, request: Request, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise ResException(
+            code=ExceptionCode.EMAIL_ALREADY_EXIST,
+            error=f"Email {user.email} already registered"
+        )
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="UserName already registered")
@@ -151,35 +183,68 @@ async def register_user(user: schemas.UserCreate, request: Request, db: Session 
     access_token = send_token(user.email, user.username, user.password, validate_url)
     db_user = crud.create_user(db=db, user=user)
     return {
-        "code": 200,
+        "code": status.HTTP_200_OK,
         "message": "You have successfully registered, please check your email and activate your account.",
         "data": db_user,
-        "access_token": access_token
     }
 
 
-@router_database.get("/videos", response_model=list[schemas.Video])
+@router_database.get("/videos", response_model=schemas.VideoResponse)
 def read_videos(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     videos = crud.get_videos(db, skip=skip, limit=limit)
-    return videos
+    if len(videos) == 0:
+        raise ResException(
+            code=ExceptionCode.VIDEO_NOT_FOUND,
+            error=f"Videos not found"
+        )
+    return {
+        "code": status.HTTP_200_OK,
+        "message": "You have successfully get videos info",
+        "data": videos,
+    }
 
 
-@router_database.get("/videos/category/{category}", response_model=list[schemas.Video])
-def read_category_videos(category: VideoCategoryType, db: Session = Depends(get_db)):
+@router_database.get("/videos/category/{category}", response_model=schemas.VideoResponse)
+def read_category_videos(category: VideoCategoryType, skip: int = 0, limit: int = 10,
+                         db: Session = Depends(get_db)):
     videos = crud.get_videos_by_category(db, category)
-    return videos
+    if len(videos) == 0:
+        raise ResException(
+            code=ExceptionCode.VIDEO_NOT_FOUND,
+            error=f"Videos not found"
+        )
+    return {
+        "code": status.HTTP_200_OK,
+        "message": f"You have successfully get {category} videos info",
+        "data": videos,
+    }
 
 
-@router_database.get("/videos/user/{username}", response_model=list[schemas.Video])
-def read_user_videos(username: str, db: Session = Depends(get_db)):
+@router_database.get("/videos/user/{username}", response_model=schemas.VideoResponse)
+def read_user_videos(username: str, skip: int = 0, limit: int = 10,
+                     db: Session = Depends(get_db)):
     videos = crud.get_videos_by_username(db, username)
-    return videos
+    if len(videos) == 0:
+        raise ResException(
+            code=ExceptionCode.VIDEO_NOT_FOUND,
+            error=f"Videos not found"
+        )
+    return {
+        "code": status.HTTP_200_OK,
+        "message": f"You have successfully get {username} videos info",
+        "data": videos,
+    }
 
 
-@router_database.post("/videos/{user_id}/create", response_model=schemas.Video)
+@router_database.post("/videos/{user_id}/create", response_model=schemas.VideoResponse)
 def create_video_for_user(user_id: int, video: schemas.VideoCreate,
                           db: Session = Depends(get_db)):
-    return crud.create_user_video(db=db, video=video, user_id=user_id)
+    video = crud.create_user_video(db=db, video=video, user_id=user_id)
+    return {
+        "code": status.HTTP_200_OK,
+        "message": f"You have successfully create a video",
+        "data": video,
+    }
 
 
 # include sub router

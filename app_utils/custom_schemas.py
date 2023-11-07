@@ -3,7 +3,7 @@ from enum import Enum
 from pydantic import BaseModel
 
 
-class VideoCategoryType(Enum):
+class VideoCategoryType(str, Enum):
     DEFAULT = "no classify"
     TECH = "tech"
     FOOD = "food"

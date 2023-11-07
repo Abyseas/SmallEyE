@@ -19,6 +19,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=False)
     avatar_key = Column(String)
+    follow_sum = Column(Integer, default=0)
+    like_sum = Column(Integer, default=0)
+    fans_sum = Column(Integer, default=0)
 
     videos = relationship("Video", back_populates="owner")
 

@@ -1,7 +1,7 @@
 from typing import Union
 from datetime import datetime, timedelta
 
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
@@ -10,22 +10,15 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app_utils.CONST import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from app_utils.exception import ResException, ExceptionCode
 from app_db import schemas, crud, models
 from app_db.database import get_db
+from .login_model import Token, TokenData
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/token", auto_error=False)
 login_router = APIRouter(prefix='/login', tags=["login"])
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
-class TokenData(BaseModel):
-    user_id: Union[int, None] = None
 
 
 def verify_password(plain_password, hashed_password):
@@ -57,15 +50,23 @@ def create_access_token(data: dict, expires_delta: Union[timedelta, None] = None
 
 
 async def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
+    if not token:
+        raise ResException(
+            code=ExceptionCode.NO_AUTHENTICATE,
+            error="Not authenticated, please make sure you have this header(Authorization: Bearer Your_Access_Token)",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    credentials_exception = ResException(
+        code=ExceptionCode.CREDENTIALS_NOT_VALIDATE,
+        error="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"}
     )
     try:
         # sub 属性会被校验，必须是str属性
+        print("@@@", token)
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
+
         if user_id is None:
             raise credentials_exception
         token_data = TokenData(user_id=int(user_id))
@@ -79,69 +80,87 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
 
 async def get_current_active_user(current_user: schemas.User = Depends(get_current_user)):
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise ResException(
+            code=ExceptionCode.USER_NOT_ACTIVE,
+            error="Inactive user"
+        )
     return current_user
 
 
-@login_router.post("/token", response_model=Token)
+@login_router.post("/token")
 async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user: models.User = authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise ResException(
+            code=ExceptionCode.INCORRECT_USER_OR_PASSWORD,
+            error="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    if not user.is_active:
+        raise ResException(
+            code=ExceptionCode.USER_NOT_ACTIVE,
+            error="Inactive user"
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "code": status.HTTP_200_OK,
+        "message": "Access token create",
+        "data": {
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    }
 
 
-@login_router.get("/validate/{access_token}")
-async def validate_register_token(access_token: str, db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+@login_router.get("/validate/{register_token}", response_model=schemas.BaseResponse)
+async def validate_register_token(register_token: str, db: Session = Depends(get_db)):
+    credentials_exception = ResException(
+        code=ExceptionCode.CREDENTIALS_NOT_VALIDATE,
+        error="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(access_token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(register_token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("username")
         password = payload.get("password")
         if username is None:
             raise credentials_exception
     except JWTError as e:
         raise credentials_exception
-    # if datetime.utcnow() > expire:
-    #     raise HTTPException(
-    #         status_code=status.HTTP_401_UNAUTHORIZED,
-    #         detail="Token expired",
-    #         headers={"WWW-Authenticate": "Bearer"},
-    #     )
     user: models.User = authenticate_user(username, password, db)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+        raise ResException(
+            code=ExceptionCode.INCORRECT_USER_OR_PASSWORD,
+            error="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     cnt = crud.update_user_by_username(db, username, "is_active", True)
     return {
-        "code": 200,
+        "code": status.HTTP_200_OK,
         "message": "User is activated, please login now",
         "data": {
-            "update_count": cnt
+            "update_count": cnt,
+            "register_token": register_token
         }
     }
 
 
-@login_router.get("/users/me/", response_model=schemas.User)
+@login_router.get("/users/me", response_model=schemas.UserResponse)
 async def read_users_me(current_user: schemas.User = Depends(get_current_active_user)):
-    return current_user
+    return {
+        "code": status.HTTP_200_OK,
+        "message": "Your info get successfully",
+        "data": current_user
+    }
 
 
-@login_router.get("/users/me/items/")
+@login_router.get("/users/me/videos", response_model=schemas.VideoResponse)
 async def read_own_items(current_user: schemas.User = Depends(get_current_active_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]
+    return {
+        "code": status.HTTP_200_OK,
+        "message": "Your video info get successfully",
+        "data": current_user.videos
+    }
