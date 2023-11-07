@@ -105,9 +105,6 @@ def read_bucket_video_list(bucket_name: str, prefix: Union[str] = None, marker: 
 
 @app.post("/upload/{bucket_name}")
 async def upload_source(bucket_name: str, file: UploadFile = File(), metadata: str = Form()):
-    """upload source
-
-    """
     file_bytes = await file.read()
     title = file.filename
     # with open(f"./data/upload/{title}", 'wb') as f:
@@ -178,7 +175,10 @@ async def register_user(user: schemas.UserCreate, request: Request, db: Session 
         )
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
-        raise HTTPException(status_code=400, detail="UserName already registered")
+        raise ResException(
+            code=ExceptionCode.USERNAME_ALREADY_EXIST,
+            error=f"Name {user.username} already registered"
+        )
     validate_url = str(request.base_url) + "login/validate"
     access_token = send_token(user.email, user.username, user.password, validate_url)
     db_user = crud.create_user(db=db, user=user)

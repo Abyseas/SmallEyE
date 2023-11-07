@@ -13,9 +13,9 @@ class VideoBase(BaseModel):
 
 
 class VideoCreate(VideoBase):
-    video_key: str
-    avatar_key: str
-    cover_key: str
+    video_key: Union[str] = None
+    avatar_key: Union[str] = None
+    cover_key: Union[str] = None
 
 
 class Video(VideoBase):
@@ -46,6 +46,7 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool = False
+    avatar_key: str = 'avatar/0-default_header.png'
     follow_sum: int
     like_sum: int
     fans_sum: int
@@ -62,8 +63,8 @@ class BaseResponse(BaseModel):
 
 
 class UserResponse(BaseResponse):
-    data: Union[User, list[User]]
+    data: Union[User, list[User], None]
 
 
 class VideoResponse(BaseResponse):
-    data: Union[Video, list[Video]]
+    data: Union[Video, list[Video], None]

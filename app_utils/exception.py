@@ -10,6 +10,7 @@ class ExceptionCode(IntEnum):
     CREDENTIALS_NOT_VALIDATE = 1004
     USER_NOT_ACTIVE = 1005
     NO_AUTHENTICATE = 1006  # 请求未带 authenticate头
+    USERNAME_ALREADY_EXIST = 1007
 
     # video relate
     VIDEO_NOT_FOUND = 1011

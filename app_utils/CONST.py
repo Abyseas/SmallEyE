@@ -2,6 +2,7 @@
 access_key = "x34GCNDuYpCFsNtqkrri3Eagr6OANYyboWRZtWQv"
 secret_key = "f_lfzdkBoEfOa_7a_0yrMOcIdfr-cHv9H463B5Xh"
 bucket_name = "yy-short-video"
+pipline_name = "small_eye"
 
 # database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./app_sqlite.db"
