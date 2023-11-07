@@ -83,8 +83,8 @@
           <!-- 点赞 -->
           <div class="click-info">
             <div class="info-icon-container">
-              <el-tooltip effect="dark" content="点赞" placement="right-start" >
-                <el-icon :class="liked ? 'liked-icon' : ''"  @click="switchLike">
+              <el-tooltip effect="dark" content="点赞" placement="right-start">
+                <el-icon :class="liked ? 'liked-icon' : ''" @click="switchLike">
                   <icon-filled-heart></icon-filled-heart>
                 </el-icon>
               </el-tooltip>
@@ -95,7 +95,7 @@
           <div class="click-info">
             <div class="info-icon-container">
               <el-tooltip effect="dark" content="评论" placement="right-start">
-                <el-icon >
+                <el-icon>
                   <icon-comment></icon-comment>
                 </el-icon>
               </el-tooltip>
@@ -104,7 +104,7 @@
           </div>
           <!-- 收藏 -->
           <div class="click-info">
-            <div class="info-icon-container" >
+            <div class="info-icon-container">
               <el-tooltip effect="dark" content="收藏" placement="right-start">
                 <el-icon :class="collected ? 'collectd-icon' : ''" @click="switchCollect">
                   <icon-star></icon-star>
@@ -115,7 +115,7 @@
           </div>
           <!-- 分享 -->
           <div class="click-info">
-            <div class="info-icon-container"> 
+            <div class="info-icon-container">
               <el-tooltip effect="dark" content="分享" placement="right-start">
                 <el-icon>
                   <icon-share></icon-share>

@@ -2,7 +2,7 @@
   const nav_list = [
     {
       label: '首页',
-      url: '/home',
+      url: '/home/default',
       icon: 'home',
     },
     {
@@ -12,7 +12,7 @@
     },
     {
       label: '热点',
-      url: '/hot',
+      url: '/home/hot',
       icon: 'fire',
     },
     {

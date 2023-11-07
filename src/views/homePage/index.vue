@@ -1,33 +1,64 @@
 <script setup lang="ts">
-  import { video } from '@/api/video'
+  import { video, hotVideo } from '@/api/video'
+  import { useRoute } from 'vue-router'
   import { Waterfall } from 'vue-waterfall-plugin-next'
   import SwiperMask from '@/components/SwiperMask.vue'
   import VideoSkeleton from '@/components/VideoSkeleton.vue'
   import { skeletonList } from '@/utils/common'
   import 'vue-waterfall-plugin-next/dist/style.css'
   const videoList = ref<API.VideoInfo[]>([])
-
+  const router = useRoute()
   const videoListLen = ref(0)
-  const getVideoList = async (lastIdx: number) => {
-    const videoResult = await video(lastIdx)
+
+  const initVideoList = async () => {
+    let videoResult
+    if (isHot.value) {
+      videoResult = await hotVideo(0)
+    } else {
+      videoResult = await video(0)
+    }
+
     if (loading.value === true) {
       loading.value = false
     }
+    videoList.value = videoResult.data
+    videoListLen.value = videoList.value.length
+  }
+
+  const addVideoList = async (lastIdx: number) => {
+    let videoResult
+    if (isHot.value) {
+      videoResult = await hotVideo(lastIdx)
+    } else {
+      videoResult = await video(lastIdx)
+    }
+
     videoList.value = videoList.value.concat(videoResult.data)
     videoListLen.value = videoList.value.length
   }
   const muted = ref(true)
   const activeIdx = ref(0)
+  const isHot = ref(false)
   const showVideoSwiper = ref(false)
   const loading = ref(true)
   const waterfallRef = ref()
+
+  const updateIsHot = (param: string | string[]) => {
+    if (param === 'hot') {
+      isHot.value = true
+    } else {
+      isHot.value = false
+    }
+    loading.value = true
+    initVideoList()
+  }
 
   const handleMutedChange = (event: Event) => {
     const player = event.target as HTMLAudioElement
     muted.value = player.muted
   }
 
-  const handleClick = (index: number) => { 
+  const handleClick = (index: number) => {
     activeIdx.value = index
     showVideoSwiper.value = true
   }
@@ -37,7 +68,7 @@
   }
 
   const handleReachEnd = () => {
-    getVideoList(videoListLen.value)
+    addVideoList(videoListLen.value)
   }
 
   const debounce = (func: Function, delay: number) => {
@@ -47,19 +78,28 @@
         clearTimeout(timer)
       }
 
-      timer = setTimeout(() => { 
+      timer = setTimeout(() => {
         func()
       }, delay)
     }
   }
   const handleProgress = debounce(() => {
-    console.log('renderer')
     waterfallRef.value.renderer()
   }, 1000)
 
+  watch(
+    () => router.params.hot,
+    (value, oldValue) => {
+      if (value !== oldValue) {
+        updateIsHot(value)
+      }
+    },
+  )
+
   onMounted(() => {
+    updateIsHot(router.params.hot)
     setTimeout(() => {
-      getVideoList(videoListLen.value)
+      initVideoList()
     }, 1000)
   })
 </script>
@@ -69,7 +109,7 @@
     class="home-page-container"
     v-infinite-scroll="
       () => {
-        getVideoList(videoListLen)
+        addVideoList(videoListLen)
       }
     "
     :infinite-scroll-immediate="false"

@@ -3,7 +3,7 @@
   import cloneDeep from 'lodash/cloneDeep'
   import IconUser from '~icons/custom/user'
   import IconKeyboard from '~icons/custom/keyboard'
-  import IconCheck from '~icons/custom/check'
+  // import IconCheck from '~icons/custom/check'
   import IconEmail from '~icons/custom/email'
   import type { FormInstance } from 'element-plus'
   import { ElMessage } from 'element-plus'
@@ -15,10 +15,10 @@
     checkPass: '',
     email: '',
   }
-  
+
   const EMPTY_LOGIN_DATA = {
     name: '',
-    pass: ''
+    pass: '',
   }
 
   const props = defineProps({
@@ -42,10 +42,10 @@
   const loginData = ref<LoginData>(cloneDeep(EMPTY_LOGIN_DATA))
   const registerData = ref<RegisterData>(cloneDeep(EMPTY_REGISTER_DATA))
   const loginFormRef = ref<InstanceType<typeof FormInstance>>()
-  const registerFormRef = ref<InstanceType<typeof FormInstance>>() 
+  const registerFormRef = ref<InstanceType<typeof FormInstance>>()
 
   const closeDialog = () => {
-    loginData.value =  cloneDeep(EMPTY_LOGIN_DATA)
+    loginData.value = cloneDeep(EMPTY_LOGIN_DATA)
     registerData.value = cloneDeep(EMPTY_REGISTER_DATA)
     emit('closeLogin')
   }
@@ -74,7 +74,7 @@
   const validateCheckPass = (rule: any, value: any, callback: any) => {
     if (value === '') {
       callback(new Error('请再次输入密码'))
-    } else if (value !== registerData.pass) {
+    } else if (value !== registerData.value.pass) {
       callback(new Error('密码输入不一致!'))
     } else {
       callback()
@@ -88,7 +88,7 @@
     email: [
       { required: true, message: '请输入邮箱', trigger: 'blur' },
       { type: 'email', message: '请输入正确的邮箱格式', trigger: ['change', 'blur'] },
-    ] 
+    ],
   }
 
   const handleRegister = async (formEL: InstanceType<typeof FormInstance>) => {
@@ -111,20 +111,20 @@
 
     try {
       const registerResult = await register(user)
-      if(registerResult.code === 200) {
-          ElMessage({
+      if (registerResult.code === 200) {
+        ElMessage({
           message: '注册成功',
           type: 'success',
         })
 
-        registerSuccess.value = true;
+        registerSuccess.value = true
         setTimeout(() => {
           //clear form data
           registerData.value = JSON.parse(JSON.stringify(EMPTY_REGISTER_DATA))
-          registerSuccess.value = false;
+          registerSuccess.value = false
         }, 3000)
       } else {
-          ElMessage({
+        ElMessage({
           message: getExceptionMessage(registerResult.code),
           type: 'error',
         })
@@ -157,8 +157,8 @@
 
     try {
       const loginResult = await login(user)
-      if(loginResult.code === 200) {
-          ElMessage({
+      if (loginResult.code === 200) {
+        ElMessage({
           message: '登录成功',
           type: 'success',
         })
@@ -166,12 +166,12 @@
         storage.set('token', loginResult.data)
         storage.set('username', user.username)
         storage.set('tokenStartTime', new Date().getTime())
-        emit("loginSuccess")
+        emit('loginSuccess')
         visible.value = false
         closeDialog()
       } else {
-          ElMessage({
-          message:  getExceptionMessage(loginResult.code),
+        ElMessage({
+          message: getExceptionMessage(loginResult.code),
           type: 'error',
         })
       }
@@ -226,7 +226,7 @@
             <span class="custom-tabs-label"> 用户注册 </span>
           </template>
           <div v-if="!registerSuccess">
-            <el-form   :model="registerData" :rules="registerRules" ref="registerFormRef" status-icon>
+            <el-form :model="registerData" :rules="registerRules" ref="registerFormRef" status-icon>
               <el-form-item class="login-form-item" prop="name">
                 <el-input v-model="registerData.name" placeholder="用户名">
                   <template #prefix>
@@ -270,10 +270,12 @@
                 </el-input>
               </el-form-item> -->
             </el-form>
-            <el-button class="base-button bottom-button" @click="handleRegister(registerFormRef)">注册</el-button>
+            <el-button class="base-button bottom-button" @click="handleRegister(registerFormRef)"
+              >注册</el-button
+            >
           </div>
-          <div v-else style="height: 158px; ">
-             <h3>请去邮箱进行验证，验证成功后即可登录</h3>
+          <div v-else style="height: 158px">
+            <h3>请去邮箱进行验证，验证成功后即可登录</h3>
           </div>
         </el-tab-pane>
       </el-tabs>

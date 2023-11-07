@@ -12,7 +12,7 @@ const routes = [
     component: Home,
     children: [
       { path: '', component: Recommend },
-      { path: 'home', component: HomePage },
+      { path: 'home/:hot', component: HomePage },
       { path: 'my', component: UserPage },
       { path: 'category/:category', component: CategoryPage },
     ],

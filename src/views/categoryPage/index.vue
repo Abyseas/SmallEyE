@@ -9,8 +9,8 @@
   const videoList = ref<API.VideoInfo[]>([])
   const videoListLen = ref(0)
 
-  const initVideoList = async (lastIdx: number) => {
-    const videoResult = await videoCategory(category.value, lastIdx)
+  const initVideoList = async () => {
+    const videoResult = await videoCategory(category.value, 0)
     videoList.value = videoResult.data
     videoListLen.value = videoList.value.length
   }
@@ -31,7 +31,7 @@
     muted.value = player.muted
   }
 
-  const handleClick = (index: number) => { 
+  const handleClick = (index: number) => {
     activeIdx.value = index
     showVideoSwiper.value = true
   }
@@ -46,7 +46,7 @@
 
   const updateCategory = (value: string | string[]) => {
     category.value = value as string
-    initVideoList(videoListLen.value)
+    initVideoList()
   }
 
   const debounce = (func: Function, delay: number) => {
@@ -62,7 +62,6 @@
     }
   }
   const handleProgress = debounce(() => {
-    console.log('renderer')
     waterfallRef.value.renderer()
   }, 100)
 
@@ -71,7 +70,7 @@
     (value, oldValue) => {
       if (value !== oldValue) {
         updateCategory(value)
-      } 
+      }
     },
   )
   onMounted(() => {
